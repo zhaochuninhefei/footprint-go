@@ -7,5 +7,7 @@ import (
 func main() {
 	zclog.Info("footprint-go main start...")
 
+	//mysql.RunDBTest()
+
 	zclog.Info("footprint-go main stop...")
 }

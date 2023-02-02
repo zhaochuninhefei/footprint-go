@@ -11,7 +11,7 @@ type EmbedFileInfo struct {
 	content string // 文件内容
 }
 
-func PrintEmbedFs(embedFs *embed.FS, dirPath string) ([]EmbedFileInfo, error) {
+func ReadEmbedFsByDirName(embedFs *embed.FS, dirPath string) ([]EmbedFileInfo, error) {
 	files := make([]EmbedFileInfo, 0)
 
 	entries, err := embedFs.ReadDir(dirPath)
@@ -24,7 +24,7 @@ func PrintEmbedFs(embedFs *embed.FS, dirPath string) ([]EmbedFileInfo, error) {
 		path := filepath.Join(dirPath, name)
 		isDir := entry.IsDir()
 		if isDir {
-			subFiles, err := PrintEmbedFs(embedFs, path)
+			subFiles, err := ReadEmbedFsByDirName(embedFs, path)
 			if err != nil {
 				return nil, err
 			}

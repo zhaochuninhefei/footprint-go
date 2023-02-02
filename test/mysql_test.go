@@ -3,7 +3,7 @@ package test
 import (
 	"gitee.com/zhaochuninhefei/zcgolog/zclog"
 	"github.com/zhaochuninhefei/footprint-go/db/mysql"
-	"github.com/zhaochuninhefei/footprint-go/resources/db/versionctl"
+	"github.com/zhaochuninhefei/footprint-go/resources"
 	"testing"
 )
 
@@ -20,9 +20,29 @@ func runDBTest() {
 		return
 	}
 
-	mysqlClient.Exec("drop table if exists `brood_db_version_ctl`")
+	db := mysqlClient.Exec("drop table if exists `brood_db_version_ctl`")
+	if err := db.Error; err != nil {
+		zclog.Errorln(err)
+		return
+	}
+	tables := make([]string, 0)
+	mysqlClient.Raw("show tables").Scan(&tables)
+	zclog.Info(tables)
 
-	zclog.Info(versionctl.CreateSql)
+	createSql, err := resources.DBFiles.ReadFile("db/versionctl/create_brood_db_version_ctl.sql")
+	if err != nil {
+		zclog.Errorln(err)
+		return
+	}
 
-	mysqlClient.Exec(versionctl.CreateSql)
+	zclog.Info(string(createSql))
+
+	mysqlClient.Exec(string(createSql))
+	if err := db.Error; err != nil {
+		zclog.Errorln(err)
+		return
+	}
+	tables = make([]string, 0)
+	mysqlClient.Raw("show tables").Scan(&tables)
+	zclog.Info(tables)
 }

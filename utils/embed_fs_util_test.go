@@ -2,7 +2,7 @@ package utils
 
 import (
 	"fmt"
-	"github.com/zhaochuninhefei/footprint-go/test/resources"
+	"gitee.com/zhaochuninhefei/footprint-go/test/resources"
 	"testing"
 )
 

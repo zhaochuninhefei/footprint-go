@@ -1,8 +1,8 @@
 package db
 
 import (
+	"gitee.com/zhaochuninhefei/footprint-go/db/mysql"
 	"gitee.com/zhaochuninhefei/zcgolog/zclog"
-	"github.com/zhaochuninhefei/footprint-go/db/mysql"
 	"gorm.io/gen"
 	"testing"
 )

@@ -16,7 +16,7 @@ import (
 
 	"gorm.io/plugin/dbresolver"
 
-	"github.com/zhaochuninhefei/footprint-go/db/model"
+	"gitee.com/zhaochuninhefei/footprint-go/db/model"
 )
 
 func newBroodDbVersionCtl(db *gorm.DB, opts ...gen.DOOption) broodDbVersionCtl {

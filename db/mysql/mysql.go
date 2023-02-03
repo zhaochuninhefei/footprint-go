@@ -2,8 +2,8 @@ package mysql
 
 import (
 	"fmt"
+	"gitee.com/zhaochuninhefei/footprint-go/resources"
 	"gitee.com/zhaochuninhefei/zcgolog/zclog"
-	"github.com/zhaochuninhefei/footprint-go/resources"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )

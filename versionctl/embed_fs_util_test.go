@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"gitee.com/zhaochuninhefei/footprint-go/test/resources"
+	"sort"
 	"strings"
 	"testing"
 )
@@ -152,5 +153,46 @@ func TestAnalyzeDetailsFromSqlFileName(t *testing.T) {
 		}
 	} else {
 		t.Fatal("匹配了不正确的文件名")
+	}
+}
+
+func TestGroupAndSort(t *testing.T) {
+	allFileInfos, err := ReadEmbedFsByDirName(&resources.DBFilesTest, "db")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	group := make(map[string][]*EmbedSqlFileInfo)
+	for _, fileInfo := range allFileInfos {
+		group[fileInfo.BusinessSpace] = append(group[fileInfo.BusinessSpace], fileInfo)
+	}
+
+	for bs, subInfos := range group {
+		fmt.Printf("业务空间: %s\n", bs)
+		fmt.Println("排序前:")
+		for _, info := range subInfos {
+			fmt.Printf("  sql脚本名: %s\n", info.Name)
+		}
+		sort.SliceStable(subInfos, func(i, j int) bool {
+			infoI := subInfos[i]
+			infoJ := subInfos[j]
+			if infoI.MajorVersion == infoJ.MajorVersion {
+				if infoI.MinorVersion == infoJ.MinorVersion {
+					if infoI.PatchVersion == infoJ.PatchVersion {
+						return infoI.ExtendVersion < infoJ.ExtendVersion
+					} else {
+						return infoI.PatchVersion < infoJ.PatchVersion
+					}
+				} else {
+					return infoI.MinorVersion < infoJ.MinorVersion
+				}
+			} else {
+				return infoI.MajorVersion < infoJ.MajorVersion
+			}
+		})
+		fmt.Println("排序后:")
+		for _, info := range subInfos {
+			fmt.Printf("  sql脚本名: %s\n", info.Name)
+		}
 	}
 }

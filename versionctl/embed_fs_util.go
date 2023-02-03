@@ -88,6 +88,7 @@ func AnalyzeDetailsFromSqlFileName(fileInfo *EmbedSqlFileInfo) error {
 				}
 				fileInfo.PatchVersion = patch
 				fileInfo.CustomName = strMatched[5]
+				fileInfo.Version = fmt.Sprintf("%s_V%d.%d.%d", fileInfo.BusinessSpace, major, minor, patch)
 				return nil
 			}
 		}
@@ -117,6 +118,7 @@ func AnalyzeDetailsFromSqlFileName(fileInfo *EmbedSqlFileInfo) error {
 				}
 				fileInfo.ExtendVersion = extend
 				fileInfo.CustomName = strMatched[6]
+				fileInfo.Version = fmt.Sprintf("%s_V%d.%d.%d.%d", fileInfo.BusinessSpace, major, minor, patch, extend)
 				return nil
 			}
 		}

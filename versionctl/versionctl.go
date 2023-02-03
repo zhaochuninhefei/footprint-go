@@ -49,6 +49,28 @@ const (
 )
 
 func chargeOperationMode() OperationMode {
+	tables := queryExistTblNames()
+	// 判断当前database是否非空
+	if len(tables) == 0 {
+		// 当前database为空，首次启动服务，导入全部数据库脚本，并创建数据库版本控制表，并生成数据库版本记录。
+		return DEPLOY_INIT
+	}
+	// 如果当前database非空，判断是否已经创建了数据库版本控制表"brood_db_version_ctl"
+	var ctlTblExists = false
+	dbVersionTableName := ctlProps.DbVersionTableName
+	if dbVersionTableName == "" {
+		dbVersionTableName = "brood_db_version_ctl"
+	}
+	for _, table := range tables {
+		if table == dbVersionTableName {
+			ctlTblExists = true
+			break
+		}
+	}
+	if ctlTblExists {
+		// 判断是否需要重置数据库版本控制表
+
+	}
 
 	return DEPLOY_INCREASE
 }
@@ -61,4 +83,14 @@ func queryExistTblNames() []string {
 	tables := make([]string, 0)
 	dbClient.Raw(showTblSql).Scan(&tables)
 	return tables
+}
+
+func checkBaselineResetConditionSql() bool {
+	baselineResetConditionSql := ctlProps.BaselineResetConditionSql
+	if baselineResetConditionSql == "" {
+		return false
+	}
+	results := make([]interface{}, 0)
+	dbClient.Raw(baselineResetConditionSql).Scan(&results)
+	return len(results) > 0
 }

@@ -210,7 +210,21 @@ func TestQueryExistTblNames(t *testing.T) {
 
 	tables := queryExistTblNames()
 	fmt.Println(tables)
+}
 
+func TestCheckBaselineResetConditionSql(t *testing.T) {
+	ctlProps = prepareCtlProps()
+	//goland:noinspection SqlResolve
+	ctlProps.BaselineResetConditionSql = "select * from brood_db_version_ctl"
+	var err error
+	dbClient, err = mysql.ConnectMysqlByDefault(nil, "localhost", "3307", "zhaochun1", "zhaochun@GITHUB", "db_footprint_test")
+	if err != nil {
+		zclog.Errorln(err)
+		return
+	}
+
+	result := checkBaselineResetConditionSql()
+	fmt.Println(result)
 }
 
 func prepareCtlProps() *DbVersionCtlProps {

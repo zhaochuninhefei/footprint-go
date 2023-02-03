@@ -15,7 +15,9 @@ func TestPrintEmbedFs(t *testing.T) {
 		t.Fatal(err)
 	}
 	for _, fileInfo := range files {
-		fmt.Printf("文件名: %s, 访问路径: %s\n", fileInfo.Name, fileInfo.Path)
+		jsonFileInfo, _ := json.Marshal(fileInfo)
+		fmt.Println(string(jsonFileInfo))
+		//fmt.Printf("文件名: %s, 访问路径: %s\n", fileInfo.Name, fileInfo.Path)
 		//fmt.Printf("文件名: %s, 访问路径: %s, \n文件内容:\n----------\n%s\n----------\n", fileInfo.name, fileInfo.Path, fileInfo.content)
 	}
 
@@ -26,7 +28,9 @@ func TestPrintEmbedFs(t *testing.T) {
 		t.Fatal(err)
 	}
 	for _, fileInfo := range files {
-		fmt.Printf("文件名: %s, 访问路径: %s\n", fileInfo.Name, fileInfo.Path)
+		jsonFileInfo, _ := json.Marshal(fileInfo)
+		fmt.Println(string(jsonFileInfo))
+		//fmt.Printf("文件名: %s, 访问路径: %s\n", fileInfo.Name, fileInfo.Path)
 		//fmt.Printf("文件名: %s, 访问路径: %s, \n文件内容:\n----------\n%s\n----------\n", fileInfo.name, fileInfo.Path, fileInfo.content)
 	}
 
@@ -37,7 +41,9 @@ func TestPrintEmbedFs(t *testing.T) {
 		t.Fatal(err)
 	}
 	for _, fileInfo := range files {
-		fmt.Printf("文件名: %s, 访问路径: %s\n", fileInfo.Name, fileInfo.Path)
+		jsonFileInfo, _ := json.Marshal(fileInfo)
+		fmt.Println(string(jsonFileInfo))
+		//fmt.Printf("文件名: %s, 访问路径: %s\n", fileInfo.Name, fileInfo.Path)
 		//fmt.Printf("文件名: %s, 访问路径: %s, \n文件内容:\n----------\n%s\n----------\n", fileInfo.name, fileInfo.Path, fileInfo.content)
 	}
 
@@ -48,7 +54,9 @@ func TestPrintEmbedFs(t *testing.T) {
 		t.Fatal(err)
 	}
 	for _, fileInfo := range files {
-		fmt.Printf("文件名: %s, 访问路径: %s\n", fileInfo.Name, fileInfo.Path)
+		jsonFileInfo, _ := json.Marshal(fileInfo)
+		fmt.Println(string(jsonFileInfo))
+		//fmt.Printf("文件名: %s, 访问路径: %s\n", fileInfo.Name, fileInfo.Path)
 		//fmt.Printf("文件名: %s, 访问路径: %s, \n文件内容:\n----------\n%s\n----------\n", fileInfo.name, fileInfo.Path, fileInfo.content)
 	}
 
@@ -59,7 +67,9 @@ func TestPrintEmbedFs(t *testing.T) {
 		t.Fatal(err)
 	}
 	for _, fileInfo := range files {
-		fmt.Printf("文件名: %s, 访问路径: %s\n", fileInfo.Name, fileInfo.Path)
+		jsonFileInfo, _ := json.Marshal(fileInfo)
+		fmt.Println(string(jsonFileInfo))
+		//fmt.Printf("文件名: %s, 访问路径: %s\n", fileInfo.Name, fileInfo.Path)
 		//fmt.Printf("文件名: %s, 访问路径: %s, \n文件内容:\n----------\n%s\n----------\n", fileInfo.name, fileInfo.Path, fileInfo.content)
 	}
 
@@ -70,7 +80,9 @@ func TestPrintEmbedFs(t *testing.T) {
 		t.Fatal(err)
 	}
 	for _, fileInfo := range files {
-		fmt.Printf("文件名: %s, 访问路径: %s\n", fileInfo.Name, fileInfo.Path)
+		jsonFileInfo, _ := json.Marshal(fileInfo)
+		fmt.Println(string(jsonFileInfo))
+		//fmt.Printf("文件名: %s, 访问路径: %s\n", fileInfo.Name, fileInfo.Path)
 		//fmt.Printf("文件名: %s, 访问路径: %s, \n文件内容:\n----------\n%s\n----------\n", fileInfo.name, fileInfo.Path, fileInfo.content)
 	}
 
@@ -81,7 +93,9 @@ func TestPrintEmbedFs(t *testing.T) {
 		t.Fatal(err)
 	}
 	for _, fileInfo := range files {
-		fmt.Printf("文件名: %s, 访问路径: %s\n", fileInfo.Name, fileInfo.Path)
+		jsonFileInfo, _ := json.Marshal(fileInfo)
+		fmt.Println(string(jsonFileInfo))
+		//fmt.Printf("文件名: %s, 访问路径: %s\n", fileInfo.Name, fileInfo.Path)
 		//fmt.Printf("文件名: %s, 访问路径: %s, \n文件内容:\n----------\n%s\n----------\n", fileInfo.name, fileInfo.Path, fileInfo.content)
 	}
 
@@ -92,7 +106,9 @@ func TestPrintEmbedFs(t *testing.T) {
 		t.Fatal(err)
 	}
 	for _, fileInfo := range files {
-		fmt.Printf("文件名: %s, 访问路径: %s\n", fileInfo.Name, fileInfo.Path)
+		jsonFileInfo, _ := json.Marshal(fileInfo)
+		fmt.Println(string(jsonFileInfo))
+		//fmt.Printf("文件名: %s, 访问路径: %s\n", fileInfo.Name, fileInfo.Path)
 		//fmt.Printf("文件名: %s, 访问路径: %s, \n文件内容:\n----------\n%s\n----------\n", fileInfo.name, fileInfo.Path, fileInfo.content)
 	}
 }

@@ -200,7 +200,7 @@ func TestGroupAndSort(t *testing.T) {
 }
 
 func TestQueryExistTblNames(t *testing.T) {
-	ctlProps = prepareCtlProps()
+	ctlProps = FillDefaultFields(prepareCtlProps())
 	var err error
 	dbClient, err = mysql.ConnectMysqlByDefault(nil, "localhost", "3307", "zhaochun1", "zhaochun@GITHUB", "db_footprint_test")
 	if err != nil {
@@ -213,7 +213,7 @@ func TestQueryExistTblNames(t *testing.T) {
 }
 
 func TestCheckBaselineResetConditionSql(t *testing.T) {
-	ctlProps = prepareCtlProps()
+	ctlProps = FillDefaultFields(prepareCtlProps())
 	//goland:noinspection SqlResolve
 	ctlProps.BaselineResetConditionSql = "select * from brood_db_version_ctl"
 	var err error
@@ -228,7 +228,7 @@ func TestCheckBaselineResetConditionSql(t *testing.T) {
 }
 
 func prepareCtlProps() *DbVersionCtlProps {
-	ctlProps := &DbVersionCtlProps{
+	props := &DbVersionCtlProps{
 		ScriptResourceMode:               EMBEDFS,
 		ScriptDirs:                       "embedfs:db/test01",
 		BaselineBusinessSpaceAndVersions: "template_V2.11.0,smtp_V2.0.0",
@@ -246,5 +246,5 @@ func prepareCtlProps() *DbVersionCtlProps {
 		ModifyDbVersionTable:             "",
 		ModifyDbVersionTableSqlPath:      "",
 	}
-	return ctlProps
+	return props
 }

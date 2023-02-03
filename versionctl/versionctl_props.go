@@ -6,6 +6,10 @@ type ScriptResourceMode string
 const (
 	EMBEDFS    ScriptResourceMode = "embedfs"
 	FILESYSTEM ScriptResourceMode = "filesystem"
+
+	defaultDbVersionTableName          = "brood_db_version_ctl"
+	defaultDbVersionTableCreateSqlPath = "embedfs:db/versionctl/create_brood_db_version_ctl.sql"
+	defaultExistTblQuerySql            = "show tables"
 )
 
 type DbVersionCtlProps struct {
@@ -16,7 +20,7 @@ type DbVersionCtlProps struct {
 	ScriptDirs string `json:"script_dirs" yaml:"script_dirs" mapstructure:"script_dirs"`
 
 	// BaselineBusinessSpaceAndVersions 数据库非空但首次使用数据库版本管理时，指定生成版本基线的业务空间及其基线版本，多个业务空间时使用逗号连接。
-	// 例如:"raven_V1.0.0,sentry_V1.1.2" `json:"script_resource_mode" yaml:"script_resource_mode" mapstructure:"script_resource_mode"`
+	// 例如:"raven_V1.0.0,sentry_V1.1.2"
 	BaselineBusinessSpaceAndVersions string `json:"baseline_business_space_and_versions" yaml:"baseline_business_space_and_versions" mapstructure:"baseline_business_space_and_versions"`
 
 	// DbVersionTableName 数据库版本管理表，默认"brood_db_version_ctl"
@@ -62,4 +66,41 @@ type DbVersionCtlProps struct {
 
 	// ModifyDbVersionTableSqlPath 修改DbVersionTable的SQL
 	ModifyDbVersionTableSqlPath string `json:"modify_db_version_table_sql_path" yaml:"modify_db_version_table_sql_path" mapstructure:"modify_db_version_table_sql_path"`
+}
+
+func FillDefaultFields(ctlProps *DbVersionCtlProps) *DbVersionCtlProps {
+	if ctlProps == nil {
+		ctlProps = &DbVersionCtlProps{
+			ScriptResourceMode:               EMBEDFS,
+			ScriptDirs:                       "",
+			BaselineBusinessSpaceAndVersions: "",
+			DbVersionTableName:               defaultDbVersionTableName,
+			DbVersionTableCreateSqlPath:      defaultDbVersionTableCreateSqlPath,
+			DriverClassName:                  "",
+			Host:                             "",
+			Port:                             "",
+			Database:                         "",
+			Username:                         "",
+			Password:                         "",
+			ExistTblQuerySql:                 defaultExistTblQuerySql,
+			BaselineReset:                    "",
+			BaselineResetConditionSql:        "",
+			ModifyDbVersionTable:             "",
+			ModifyDbVersionTableSqlPath:      "",
+		}
+		return ctlProps
+	}
+	if ctlProps.ScriptResourceMode == "" {
+		ctlProps.ScriptResourceMode = EMBEDFS
+	}
+	if ctlProps.DbVersionTableName == "" {
+		ctlProps.DbVersionTableName = defaultDbVersionTableName
+	}
+	if ctlProps.DbVersionTableCreateSqlPath == "" {
+		ctlProps.DbVersionTableCreateSqlPath = defaultDbVersionTableCreateSqlPath
+	}
+	if ctlProps.ExistTblQuerySql == "" {
+		ctlProps.ExistTblQuerySql = defaultExistTblQuerySql
+	}
+	return ctlProps
 }

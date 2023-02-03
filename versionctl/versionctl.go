@@ -1,8 +1,10 @@
 package versionctl
 
 import (
+	"fmt"
 	"gitee.com/zhaochuninhefei/footprint-go/db/mysql"
 	"gorm.io/gorm"
+	"strings"
 )
 
 // ctlProps 数据库版本控制相关配置
@@ -12,7 +14,7 @@ var ctlProps *DbVersionCtlProps
 var dbClient *gorm.DB
 
 func DoDBVersionControl(existDB *gorm.DB, props *DbVersionCtlProps) error {
-	ctlProps = props
+	ctlProps = FillDefaultFields(props)
 	var err error
 	dbClient, err = mysql.ConnectMysqlByDefault(existDB, props.Host, props.Port, props.Username, props.Password, props.Database)
 	if err != nil {
@@ -20,6 +22,16 @@ func DoDBVersionControl(existDB *gorm.DB, props *DbVersionCtlProps) error {
 	}
 
 	// 判断本次数据库版本控制的操作模式
+	operationMode := chargeOperationMode()
+
+	switch operationMode {
+	case DEPLOY_INIT:
+	case BASELINE_INIT:
+	case BASELINE_RESET:
+	case DEPLOY_INCREASE:
+	default:
+		return fmt.Errorf("不支持的数据库版本控制操作模式: %d", operationMode)
+	}
 
 	return nil
 }
@@ -69,10 +81,19 @@ func chargeOperationMode() OperationMode {
 	}
 	if ctlTblExists {
 		// 判断是否需要重置数据库版本控制表
-
+		if strings.EqualFold("y", ctlProps.BaselineReset) &&
+			checkBaselineResetConditionSql() {
+			// 查询数据库版本控制表的最新记录。
+			// 只有属性[baselineResetConditionSql]配置的sql查询到有记录，才会执行基线重置操作。
+			// baselineResetConditionSql在配置时建议将install_time字段作为条件去查询，这样以后不会再有满足该条件的记录。
+			return BASELINE_RESET
+		}
+		// 已经存在数据库版本控制表，根据当前资源目录下的sql脚本与版本控制表中各个业务空间的最新版本做增量的sql脚本执行。
+		return DEPLOY_INCREASE
 	}
-
-	return DEPLOY_INCREASE
+	// database非空，但还没有数据库版本控制表，根据配置参数[baselineBusinessSpaceAndVersions]决定各个业务空间的基线版本，
+	// 创建数据库版本控制表，生成baseline记录；然后做增量的sql脚本执行。
+	return BASELINE_INIT
 }
 
 func queryExistTblNames() []string {

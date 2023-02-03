@@ -6,6 +6,10 @@ import (
 	"strings"
 )
 
+// RunSqlScript 执行SQL脚本
+//  @param dbClient 数据库客户端
+//  @param sqlScript SQL脚本内容
+//  @return error
 func RunSqlScript(dbClient *gorm.DB, sqlScript string) error {
 	sqls, err := ReadSqls(sqlScript)
 	if err != nil {

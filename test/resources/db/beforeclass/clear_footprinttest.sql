@@ -7,4 +7,4 @@
 -- DROP TABLE IF EXISTS `rv_temp_img_map`;
 
 DROP DATABASE `db_footprint_test`;
-CREATE DATABASE `db_footprint_test` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ;
+CREATE DATABASE `db_footprint_test` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;

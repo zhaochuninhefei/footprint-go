@@ -11,7 +11,7 @@ import (
 
 func TestPrintEmbedFs(t *testing.T) {
 	fmt.Println("db/beforeclass 下的文件")
-	files, err := ReadEmbedFsByDirName(&resources.DBFilesTest, "db/beforeclass")
+	files, err := ReadEmbedSqlByDirName(&resources.DBFilesTest, "db/beforeclass")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -24,7 +24,7 @@ func TestPrintEmbedFs(t *testing.T) {
 
 	fmt.Println()
 	fmt.Println("db/test01 下的文件")
-	files, err = ReadEmbedFsByDirName(&resources.DBFilesTest, "db/test01")
+	files, err = ReadEmbedSqlByDirName(&resources.DBFilesTest, "db/test01")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -37,7 +37,7 @@ func TestPrintEmbedFs(t *testing.T) {
 
 	fmt.Println()
 	fmt.Println("db/test02 下的文件")
-	files, err = ReadEmbedFsByDirName(&resources.DBFilesTest, "db/test02")
+	files, err = ReadEmbedSqlByDirName(&resources.DBFilesTest, "db/test02")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -50,7 +50,7 @@ func TestPrintEmbedFs(t *testing.T) {
 
 	fmt.Println()
 	fmt.Println("db/test03 下的文件")
-	files, err = ReadEmbedFsByDirName(&resources.DBFilesTest, "db/test03")
+	files, err = ReadEmbedSqlByDirName(&resources.DBFilesTest, "db/test03")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -63,7 +63,7 @@ func TestPrintEmbedFs(t *testing.T) {
 
 	fmt.Println()
 	fmt.Println("db/test04 下的文件")
-	files, err = ReadEmbedFsByDirName(&resources.DBFilesTest, "db/test04")
+	files, err = ReadEmbedSqlByDirName(&resources.DBFilesTest, "db/test04")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -76,7 +76,7 @@ func TestPrintEmbedFs(t *testing.T) {
 
 	fmt.Println()
 	fmt.Println("db/test05 下的文件")
-	files, err = ReadEmbedFsByDirName(&resources.DBFilesTest, "db/test05")
+	files, err = ReadEmbedSqlByDirName(&resources.DBFilesTest, "db/test05")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -89,7 +89,7 @@ func TestPrintEmbedFs(t *testing.T) {
 
 	fmt.Println()
 	fmt.Println("db/test06 下的文件")
-	files, err = ReadEmbedFsByDirName(&resources.DBFilesTest, "db/test06")
+	files, err = ReadEmbedSqlByDirName(&resources.DBFilesTest, "db/test06")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -102,7 +102,7 @@ func TestPrintEmbedFs(t *testing.T) {
 
 	fmt.Println()
 	fmt.Println("db 下的文件")
-	files, err = ReadEmbedFsByDirName(&resources.DBFilesTest, "db")
+	files, err = ReadEmbedSqlByDirName(&resources.DBFilesTest, "db")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -157,7 +157,7 @@ func TestAnalyzeDetailsFromSqlFileName(t *testing.T) {
 }
 
 func TestGroupAndSort(t *testing.T) {
-	allFileInfos, err := ReadEmbedFsByDirName(&resources.DBFilesTest, "db")
+	allFileInfos, err := ReadEmbedSqlByDirName(&resources.DBFilesTest, "db")
 	if err != nil {
 		t.Fatal(err)
 	}

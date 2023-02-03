@@ -8,6 +8,7 @@ import (
 	"strconv"
 )
 
+// EmbedSqlFileInfo 嵌入SQL文件信息
 type EmbedSqlFileInfo struct {
 	// sql脚本文件名
 	//  格式为"[业务空间]_V[major].[minor].[patch].[extend]_[自定义名称].sql"
@@ -44,6 +45,7 @@ var PTN_SCRIPT_NAME_DEFAULT *regexp.Regexp
 //goland:noinspection GoSnakeCaseUsage
 var PTN_SCRIPT_NAME_EXTEND *regexp.Regexp
 
+// init 初始化sql脚本文件名正则表达式
 func init() {
 	PTN_SCRIPT_NAME_DEFAULT = regexp.MustCompile("^([A-Za-z0-9]+)_V(\\d+)\\.(\\d+)\\.(\\d+)_(\\w+)\\.sql$")
 	if PTN_SCRIPT_NAME_DEFAULT == nil {
@@ -55,7 +57,12 @@ func init() {
 	}
 }
 
-func ReadEmbedFsByDirName(embedFs *embed.FS, dirPath string) ([]*EmbedSqlFileInfo, error) {
+// ReadEmbedSqlByDirName 读取嵌入文件目录下的SQL文件(包括子目录)
+//  @param embedFs 嵌入FS资源, 如根目录为`db`的嵌入FS
+//  @param dirPath 访问目录路径, 如:`db/footprint`
+//  @return []*EmbedSqlFileInfo 嵌入SQL文件信息结构体数组(切片)
+//  @return error
+func ReadEmbedSqlByDirName(embedFs *embed.FS, dirPath string) ([]*EmbedSqlFileInfo, error) {
 	files := make([]*EmbedSqlFileInfo, 0)
 
 	entries, err := embedFs.ReadDir(dirPath)
@@ -68,7 +75,7 @@ func ReadEmbedFsByDirName(embedFs *embed.FS, dirPath string) ([]*EmbedSqlFileInf
 		path := filepath.Join(dirPath, name)
 		isDir := entry.IsDir()
 		if isDir {
-			subFiles, err := ReadEmbedFsByDirName(embedFs, path)
+			subFiles, err := ReadEmbedSqlByDirName(embedFs, path)
 			if err != nil {
 				return nil, err
 			}
@@ -90,7 +97,11 @@ func ReadEmbedFsByDirName(embedFs *embed.FS, dirPath string) ([]*EmbedSqlFileInf
 	return files, nil
 }
 
+// FilledDetailsFromSqlFileName 根据SQL文件名填充细节
+//  @param fileInfo 嵌入SQL文件信息结构体
+//  @return error
 func FilledDetailsFromSqlFileName(fileInfo *EmbedSqlFileInfo) error {
+	// 优先使用默认的正则表达式解析SQL文件名
 	matcherDefault := PTN_SCRIPT_NAME_DEFAULT.FindAllStringSubmatch(fileInfo.Name, -1)
 	if len(matcherDefault) > 0 {
 		for _, strMatched := range matcherDefault {
@@ -117,6 +128,7 @@ func FilledDetailsFromSqlFileName(fileInfo *EmbedSqlFileInfo) error {
 			}
 		}
 	} else {
+		// 使用带扩展版本号的正则表达式解析SQL文件名
 		matcherExtend := PTN_SCRIPT_NAME_EXTEND.FindAllStringSubmatch(fileInfo.Name, -1)
 		for _, strMatched := range matcherExtend {
 			if len(strMatched) == 7 {
@@ -147,6 +159,6 @@ func FilledDetailsFromSqlFileName(fileInfo *EmbedSqlFileInfo) error {
 			}
 		}
 	}
-
+	// 解析失败
 	return fmt.Errorf("sqlFileName未能正确匹配正则表达式: %s", fileInfo.Name)
 }

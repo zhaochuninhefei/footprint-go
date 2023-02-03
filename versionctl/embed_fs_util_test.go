@@ -1,8 +1,10 @@
 package versionctl
 
 import (
+	"encoding/json"
 	"fmt"
 	"gitee.com/zhaochuninhefei/footprint-go/test/resources"
+	"strings"
 	"testing"
 )
 
@@ -13,8 +15,8 @@ func TestPrintEmbedFs(t *testing.T) {
 		t.Fatal(err)
 	}
 	for _, fileInfo := range files {
-		fmt.Printf("文件名: %s, 访问路径: %s\n", fileInfo.name, fileInfo.path)
-		//fmt.Printf("文件名: %s, 访问路径: %s, \n文件内容:\n----------\n%s\n----------\n", fileInfo.name, fileInfo.path, fileInfo.content)
+		fmt.Printf("文件名: %s, 访问路径: %s\n", fileInfo.Name, fileInfo.Path)
+		//fmt.Printf("文件名: %s, 访问路径: %s, \n文件内容:\n----------\n%s\n----------\n", fileInfo.name, fileInfo.Path, fileInfo.content)
 	}
 
 	fmt.Println()
@@ -24,8 +26,8 @@ func TestPrintEmbedFs(t *testing.T) {
 		t.Fatal(err)
 	}
 	for _, fileInfo := range files {
-		fmt.Printf("文件名: %s, 访问路径: %s\n", fileInfo.name, fileInfo.path)
-		//fmt.Printf("文件名: %s, 访问路径: %s, \n文件内容:\n----------\n%s\n----------\n", fileInfo.name, fileInfo.path, fileInfo.content)
+		fmt.Printf("文件名: %s, 访问路径: %s\n", fileInfo.Name, fileInfo.Path)
+		//fmt.Printf("文件名: %s, 访问路径: %s, \n文件内容:\n----------\n%s\n----------\n", fileInfo.name, fileInfo.Path, fileInfo.content)
 	}
 
 	fmt.Println()
@@ -35,8 +37,8 @@ func TestPrintEmbedFs(t *testing.T) {
 		t.Fatal(err)
 	}
 	for _, fileInfo := range files {
-		fmt.Printf("文件名: %s, 访问路径: %s\n", fileInfo.name, fileInfo.path)
-		//fmt.Printf("文件名: %s, 访问路径: %s, \n文件内容:\n----------\n%s\n----------\n", fileInfo.name, fileInfo.path, fileInfo.content)
+		fmt.Printf("文件名: %s, 访问路径: %s\n", fileInfo.Name, fileInfo.Path)
+		//fmt.Printf("文件名: %s, 访问路径: %s, \n文件内容:\n----------\n%s\n----------\n", fileInfo.name, fileInfo.Path, fileInfo.content)
 	}
 
 	fmt.Println()
@@ -46,8 +48,8 @@ func TestPrintEmbedFs(t *testing.T) {
 		t.Fatal(err)
 	}
 	for _, fileInfo := range files {
-		fmt.Printf("文件名: %s, 访问路径: %s\n", fileInfo.name, fileInfo.path)
-		//fmt.Printf("文件名: %s, 访问路径: %s, \n文件内容:\n----------\n%s\n----------\n", fileInfo.name, fileInfo.path, fileInfo.content)
+		fmt.Printf("文件名: %s, 访问路径: %s\n", fileInfo.Name, fileInfo.Path)
+		//fmt.Printf("文件名: %s, 访问路径: %s, \n文件内容:\n----------\n%s\n----------\n", fileInfo.name, fileInfo.Path, fileInfo.content)
 	}
 
 	fmt.Println()
@@ -57,8 +59,8 @@ func TestPrintEmbedFs(t *testing.T) {
 		t.Fatal(err)
 	}
 	for _, fileInfo := range files {
-		fmt.Printf("文件名: %s, 访问路径: %s\n", fileInfo.name, fileInfo.path)
-		//fmt.Printf("文件名: %s, 访问路径: %s, \n文件内容:\n----------\n%s\n----------\n", fileInfo.name, fileInfo.path, fileInfo.content)
+		fmt.Printf("文件名: %s, 访问路径: %s\n", fileInfo.Name, fileInfo.Path)
+		//fmt.Printf("文件名: %s, 访问路径: %s, \n文件内容:\n----------\n%s\n----------\n", fileInfo.name, fileInfo.Path, fileInfo.content)
 	}
 
 	fmt.Println()
@@ -68,8 +70,8 @@ func TestPrintEmbedFs(t *testing.T) {
 		t.Fatal(err)
 	}
 	for _, fileInfo := range files {
-		fmt.Printf("文件名: %s, 访问路径: %s\n", fileInfo.name, fileInfo.path)
-		//fmt.Printf("文件名: %s, 访问路径: %s, \n文件内容:\n----------\n%s\n----------\n", fileInfo.name, fileInfo.path, fileInfo.content)
+		fmt.Printf("文件名: %s, 访问路径: %s\n", fileInfo.Name, fileInfo.Path)
+		//fmt.Printf("文件名: %s, 访问路径: %s, \n文件内容:\n----------\n%s\n----------\n", fileInfo.name, fileInfo.Path, fileInfo.content)
 	}
 
 	fmt.Println()
@@ -79,8 +81,8 @@ func TestPrintEmbedFs(t *testing.T) {
 		t.Fatal(err)
 	}
 	for _, fileInfo := range files {
-		fmt.Printf("文件名: %s, 访问路径: %s\n", fileInfo.name, fileInfo.path)
-		//fmt.Printf("文件名: %s, 访问路径: %s, \n文件内容:\n----------\n%s\n----------\n", fileInfo.name, fileInfo.path, fileInfo.content)
+		fmt.Printf("文件名: %s, 访问路径: %s\n", fileInfo.Name, fileInfo.Path)
+		//fmt.Printf("文件名: %s, 访问路径: %s, \n文件内容:\n----------\n%s\n----------\n", fileInfo.name, fileInfo.Path, fileInfo.content)
 	}
 
 	fmt.Println()
@@ -90,7 +92,49 @@ func TestPrintEmbedFs(t *testing.T) {
 		t.Fatal(err)
 	}
 	for _, fileInfo := range files {
-		fmt.Printf("文件名: %s, 访问路径: %s\n", fileInfo.name, fileInfo.path)
-		//fmt.Printf("文件名: %s, 访问路径: %s, \n文件内容:\n----------\n%s\n----------\n", fileInfo.name, fileInfo.path, fileInfo.content)
+		fmt.Printf("文件名: %s, 访问路径: %s\n", fileInfo.Name, fileInfo.Path)
+		//fmt.Printf("文件名: %s, 访问路径: %s, \n文件内容:\n----------\n%s\n----------\n", fileInfo.name, fileInfo.Path, fileInfo.content)
+	}
+}
+
+func TestAnalyzeDetailsFromSqlFileName(t *testing.T) {
+	fmt.Println("---- bsTest_V1.2.3_init_test.sql ----")
+	fileInfo1 := &EmbedSqlFileInfo{
+		Name: "bsTest_V1.2.3_init_test.sql",
+	}
+	err := AnalyzeDetailsFromSqlFileName(fileInfo1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	jsonFileInfo1, _ := json.Marshal(fileInfo1)
+	fmt.Println(string(jsonFileInfo1))
+
+	fmt.Println("---- bsTest_V1.2.3.4_init_test.sql ----")
+	fileInfo2 := &EmbedSqlFileInfo{
+		Name: "bsTest_V1.2.3.4_init_test.sql",
+	}
+	err = AnalyzeDetailsFromSqlFileName(fileInfo2)
+	if err != nil {
+		t.Fatal(err)
+	}
+	jsonFileInfo2, _ := json.Marshal(fileInfo2)
+	fmt.Println(string(jsonFileInfo2))
+
+	fmt.Println("---- bsTest_V1.2.3.4.5_init_test.sql ----")
+	fileInfo3 := &EmbedSqlFileInfo{
+		Name: "bsTest_V1.2.3.4.5_init_test.sql",
+	}
+	err = AnalyzeDetailsFromSqlFileName(fileInfo3)
+	if err != nil {
+		if strings.HasPrefix(err.Error(), "sqlFileName未能正确匹配正则表达式:") {
+			fmt.Println("返回了正确的错误信息")
+			jsonFileInfo3, _ := json.Marshal(fileInfo3)
+			fmt.Println(string(jsonFileInfo3))
+			return
+		} else {
+			t.Fatal(err)
+		}
+	} else {
+		t.Fatal("匹配了不正确的文件名")
 	}
 }

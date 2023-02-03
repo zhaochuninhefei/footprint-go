@@ -3,7 +3,9 @@ package versionctl
 import (
 	"encoding/json"
 	"fmt"
+	"gitee.com/zhaochuninhefei/footprint-go/db/mysql"
 	"gitee.com/zhaochuninhefei/footprint-go/test/resources"
+	"gitee.com/zhaochuninhefei/zcgolog/zclog"
 	"sort"
 	"strings"
 	"testing"
@@ -195,4 +197,40 @@ func TestGroupAndSort(t *testing.T) {
 			fmt.Printf("  sql脚本名: %s\n", info.Name)
 		}
 	}
+}
+
+func TestQueryExistTblNames(t *testing.T) {
+	ctlProps = prepareCtlProps()
+	var err error
+	dbClient, err = mysql.ConnectMysqlByDefault(nil, "localhost", "3307", "zhaochun1", "zhaochun@GITHUB", "db_footprint_test")
+	if err != nil {
+		zclog.Errorln(err)
+		return
+	}
+
+	tables := queryExistTblNames()
+	fmt.Println(tables)
+
+}
+
+func prepareCtlProps() *DbVersionCtlProps {
+	ctlProps := &DbVersionCtlProps{
+		ScriptResourceMode:               EMBEDFS,
+		ScriptDirs:                       "embedfs:db/test01",
+		BaselineBusinessSpaceAndVersions: "template_V2.11.0,smtp_V2.0.0",
+		DbVersionTableName:               "brood_db_version_ctl1",
+		DbVersionTableCreateSqlPath:      "embedfs:db/versionctl/create_brood_db_version_ctl.sql",
+		DriverClassName:                  "mysql",
+		Host:                             "127.0.0.1",
+		Port:                             "3307",
+		Database:                         "db_footprint_test",
+		Username:                         "zhaochun1",
+		Password:                         "zhaochun@GITHUB",
+		ExistTblQuerySql:                 "show tables",
+		BaselineReset:                    "",
+		BaselineResetConditionSql:        "",
+		ModifyDbVersionTable:             "",
+		ModifyDbVersionTableSqlPath:      "",
+	}
+	return ctlProps
 }

@@ -8,9 +8,11 @@ import (
 	"strconv"
 )
 
+// PTN_SCRIPT_NAME_DEFAULT sql脚本文件名正则表达式(默认)
 //goland:noinspection GoSnakeCaseUsage
 var PTN_SCRIPT_NAME_DEFAULT *regexp.Regexp
 
+// PTN_SCRIPT_NAME_EXTEND sql脚本文件名正则表达式(带扩展版本号)
 //goland:noinspection GoSnakeCaseUsage
 var PTN_SCRIPT_NAME_EXTEND *regexp.Regexp
 
@@ -53,14 +55,14 @@ func ReadEmbedFsByDirName(embedFs *embed.FS, dirPath string) ([]*EmbedSqlFileInf
 				Path:    path,
 				Content: string(fileBytes),
 			}
-			err = AnalyzeDetailsFromSqlFileName(&fileInfo)
+			err = FilledDetailsFromSqlFileName(&fileInfo)
 			files = append(files, &fileInfo)
 		}
 	}
 	return files, nil
 }
 
-func AnalyzeDetailsFromSqlFileName(fileInfo *EmbedSqlFileInfo) error {
+func FilledDetailsFromSqlFileName(fileInfo *EmbedSqlFileInfo) error {
 	matcherDefault := PTN_SCRIPT_NAME_DEFAULT.FindAllStringSubmatch(fileInfo.Name, -1)
 	if len(matcherDefault) > 0 {
 		for _, strMatched := range matcherDefault {

@@ -118,7 +118,7 @@ func TestAnalyzeDetailsFromSqlFileName(t *testing.T) {
 	fileInfo1 := &EmbedSqlFileInfo{
 		Name: "bsTest_V1.2.3_init_test.sql",
 	}
-	err := AnalyzeDetailsFromSqlFileName(fileInfo1)
+	err := FilledDetailsFromSqlFileName(fileInfo1)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -129,7 +129,7 @@ func TestAnalyzeDetailsFromSqlFileName(t *testing.T) {
 	fileInfo2 := &EmbedSqlFileInfo{
 		Name: "bsTest_V1.2.3.4_init_test.sql",
 	}
-	err = AnalyzeDetailsFromSqlFileName(fileInfo2)
+	err = FilledDetailsFromSqlFileName(fileInfo2)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -140,7 +140,7 @@ func TestAnalyzeDetailsFromSqlFileName(t *testing.T) {
 	fileInfo3 := &EmbedSqlFileInfo{
 		Name: "bsTest_V1.2.3.4.5_init_test.sql",
 	}
-	err = AnalyzeDetailsFromSqlFileName(fileInfo3)
+	err = FilledDetailsFromSqlFileName(fileInfo3)
 	if err != nil {
 		if strings.HasPrefix(err.Error(), "sqlFileName未能正确匹配正则表达式:") {
 			fmt.Println("返回了正确的错误信息")

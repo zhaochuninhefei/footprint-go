@@ -1,6 +1,7 @@
 package versionctl
 
 import (
+	"embed"
 	"fmt"
 	"gitee.com/zhaochuninhefei/footprint-go/db/mysql"
 	"gorm.io/gorm"
@@ -13,7 +14,7 @@ var ctlProps *DbVersionCtlProps
 // db 目标数据库客户端
 var dbClient *gorm.DB
 
-func DoDBVersionControl(existDB *gorm.DB, props *DbVersionCtlProps) error {
+func DoDBVersionControl(existDB *gorm.DB, props *DbVersionCtlProps, dbFS *embed.FS) error {
 	ctlProps = FillDefaultFields(props)
 	var err error
 	dbClient, err = mysql.ConnectMysqlByDefault(existDB, props.Host, props.Port, props.Username, props.Password, props.Database)

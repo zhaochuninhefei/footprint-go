@@ -4,6 +4,7 @@ import (
 	"embed"
 	"fmt"
 	"gitee.com/zhaochuninhefei/footprint-go/db/mysql"
+	"gitee.com/zhaochuninhefei/footprint-go/resources"
 	"gorm.io/gorm"
 	"strings"
 )
@@ -27,6 +28,18 @@ func DoDBVersionControl(existDB *gorm.DB, props *DbVersionCtlProps, dbFS *embed.
 
 	switch operationMode {
 	case DEPLOY_INIT:
+		createVersionTblTask := &CreateVersionTblTask{
+			DbVersionCtlContext: DbVersionCtlContext{
+				dbClient: dbClient,
+				props:    ctlProps,
+				dbFS:     &resources.DBFiles,
+				lastTask: false,
+			},
+		}
+		err := createVersionTblTask.RunTask()
+		if err != nil {
+			return err
+		}
 	case BASELINE_INIT:
 	case BASELINE_RESET:
 	case DEPLOY_INCREASE:

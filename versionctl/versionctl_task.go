@@ -18,6 +18,7 @@ type DbVersionCtlContext struct {
 	dbClient *gorm.DB           // 数据库客户端
 	props    *DbVersionCtlProps // 版本控制配置
 	dbFS     *embed.FS          // sql脚本目录嵌入FS
+	lastTask bool               // 是否最后一个任务
 }
 
 type CreateVersionTblTask struct {

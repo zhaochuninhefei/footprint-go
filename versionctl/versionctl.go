@@ -29,7 +29,7 @@ func DoDBVersionControl(existDB *gorm.DB, props *DbVersionCtlProps, dbFS *embed.
 	tasks := make([]DbVersionCtlTask, 0)
 	switch operationMode {
 	case DEPLOY_INIT:
-		createVersionTblTask := CreateVersionTblTask{
+		createVersionTblTask := &CreateVersionTblTask{
 			DbVersionCtlContext: DbVersionCtlContext{
 				dbClient: dbClient,
 				props:    ctlProps,
@@ -38,10 +38,6 @@ func DoDBVersionControl(existDB *gorm.DB, props *DbVersionCtlProps, dbFS *embed.
 			},
 		}
 		tasks = append(tasks, createVersionTblTask)
-		//err := createVersionTblTask.RunTask()
-		//if err != nil {
-		//	return err
-		//}
 	case BASELINE_INIT:
 	case BASELINE_RESET:
 	case DEPLOY_INCREASE:

@@ -25,7 +25,7 @@ type CreateVersionTblTask struct {
 	DbVersionCtlContext
 }
 
-func (cvtt CreateVersionTblTask) RunTask() error {
+func (cvtt *CreateVersionTblTask) RunTask() error {
 	zclog.Info("CreateVersionTblTask begin...")
 	dbVersionTableCreateSqlPath := cvtt.props.DbVersionTableCreateSqlPath
 	zclog.Debugf("版本控制表建表文路径: %s", dbVersionTableCreateSqlPath)

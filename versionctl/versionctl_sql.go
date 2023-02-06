@@ -72,59 +72,12 @@ func init() {
 	}
 }
 
-// ReadEmbedSql 读取嵌入文件目录下的SQL文件(包括子目录)
-//  @param embedFs 嵌入FS资源, 如根目录为`db`的嵌入FS
-//  @param dirPath 访问目录路径, 如:`db/footprint`
+// ReadSql 读取目标目录下的SQL文件(包括子目录)
+//  @param reader 阅读器, 类型为`versionctl.SqlScriptReader`，目前支持`*embed.FS`与`*versionctl.FSSqlReader`。例如可以使用根目录为`db`的`*embed.FS`，或`&versionctl.FSSqlReader{}`。
+//  @param dirPath 访问目录路径, reader是`*embed.FS`时，路径从嵌入资源根目录开始，如`db/footprint`；reader是`&versionctl.FSSqlReader{}`时，则使用相对目录或绝对路径，如`/xxx/db/footprint`。
 //  @param filter SQL脚本过滤条件
 //  @return []*SqlScriptInfo 嵌入SQL文件信息结构体数组(切片)
 //  @return error
-//func ReadEmbedSql(embedFs *embed.FS, dirPath string, filters map[string]SqlScriptFilter) ([]*SqlScriptInfo, error) {
-//	files := make([]*SqlScriptInfo, 0)
-//
-//	entries, err := embedFs.ReadDir(dirPath)
-//	if err != nil {
-//		return nil, err
-//	}
-//
-//	for _, entry := range entries {
-//		name := entry.Name()
-//		path := filepath.Join(dirPath, name)
-//		isDir := entry.IsDir()
-//		if isDir {
-//			subFiles, err := ReadEmbedSql(embedFs, path, filters)
-//			if err != nil {
-//				return nil, err
-//			}
-//			files = append(files, subFiles...)
-//		} else {
-//			fileInfo, err := createFileInfo(name, path)
-//			if err != nil {
-//				return nil, err
-//			}
-//			if filters != nil {
-//				sqlFilter := filters[fileInfo.BusinessSpace]
-//				// 比较当前脚本的版本是否是增量
-//				if filterIncreaseFileInfoByVersions(fileInfo, sqlFilter) {
-//					fileBytes, err := embedFs.ReadFile(path)
-//					if err != nil {
-//						return nil, err
-//					}
-//					fileInfo.Content = string(fileBytes)
-//					files = append(files, &fileInfo)
-//				}
-//			} else {
-//				fileBytes, err := embedFs.ReadFile(path)
-//				if err != nil {
-//					return nil, err
-//				}
-//				fileInfo.Content = string(fileBytes)
-//				files = append(files, &fileInfo)
-//			}
-//		}
-//	}
-//	return files, nil
-//}
-
 func ReadSql(reader SqlScriptReader, dirPath string, filters map[string]SqlScriptFilter) ([]*SqlScriptInfo, error) {
 	files := make([]*SqlScriptInfo, 0)
 
@@ -148,18 +101,9 @@ func ReadSql(reader SqlScriptReader, dirPath string, filters map[string]SqlScrip
 			if err != nil {
 				return nil, err
 			}
-			if filters != nil {
-				sqlFilter := filters[fileInfo.BusinessSpace]
-				// 比较当前脚本的版本是否是增量
-				if filterIncreaseFileInfoByVersions(fileInfo, sqlFilter) {
-					fileBytes, err := reader.ReadFile(path)
-					if err != nil {
-						return nil, err
-					}
-					fileInfo.Content = string(fileBytes)
-					files = append(files, &fileInfo)
-				}
-			} else {
+			sqlFilter := filters[fileInfo.BusinessSpace]
+			// 比较当前脚本的版本是否是增量
+			if filterIncreaseFileInfoByVersions(fileInfo, sqlFilter) {
 				fileBytes, err := reader.ReadFile(path)
 				if err != nil {
 					return nil, err
@@ -257,6 +201,9 @@ func filterIncreaseFileInfoByVersions(fileInfo SqlScriptInfo, filter SqlScriptFi
 }
 
 // SqlScriptReader SQL脚本阅读器接口
+//  该接口设计为读取sql脚本的接口。
+//  其中，golang1.6增加的`embed.FS`已经实现了该接口定义的两个方法。
+//  这里又定义了FSSqlReader用于为普通文件系统实现该接口。
 type SqlScriptReader interface {
 	// ReadDir 读取目录
 	//  @param dirPath 目录访问路径

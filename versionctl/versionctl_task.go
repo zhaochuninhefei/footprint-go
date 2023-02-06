@@ -85,3 +85,24 @@ func (dvtt *DropVersionTblTask) RunTask() error {
 	}
 	return nil
 }
+
+type IncreaseVersionTask struct {
+	DbVersionCtlContext
+}
+
+func (ivt *IncreaseVersionTask) RunTask() error {
+
+	// 从数据库版本控制表读取各个业务空间的最新版本
+
+	// 生成数据库版本插入SQL语句
+
+	// 获取数据库版本升级SQL脚本目录集合
+
+	// 读取各个脚本目录下的SQL脚本，根据业务空间过滤出增量SQL脚本，获得增量脚本集合
+
+	// 对增量脚本集合按业务空间做分组，并排序
+
+	// 遍历增量SQL脚本，读取SQL脚本，插入数据库版本控制数据，执行SQL脚本，更新版本记录
+
+	return nil
+}

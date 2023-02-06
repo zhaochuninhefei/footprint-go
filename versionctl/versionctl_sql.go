@@ -37,6 +37,20 @@ type EmbedSqlFileInfo struct {
 	CustomName string `json:"custom_name"`
 }
 
+// SqlScriptFilter SQL脚本过滤条件
+type SqlScriptFilter struct {
+	// 业务空间
+	BusinessSpace string `json:"business_space"`
+	// 主版本号
+	MajorVersion int64 `json:"major_version"`
+	// 次版本号
+	MinorVersion int64 `json:"minor_version"`
+	// 补丁版本号
+	PatchVersion int64 `json:"patch_version"`
+	// 扩展版本号
+	ExtendVersion int64 `json:"extend_version"`
+}
+
 // PTN_SCRIPT_NAME_DEFAULT sql脚本文件名正则表达式(默认)
 //goland:noinspection GoSnakeCaseUsage
 var PTN_SCRIPT_NAME_DEFAULT *regexp.Regexp
@@ -60,9 +74,10 @@ func init() {
 // ReadEmbedSqlByDirName 读取嵌入文件目录下的SQL文件(包括子目录)
 //  @param embedFs 嵌入FS资源, 如根目录为`db`的嵌入FS
 //  @param dirPath 访问目录路径, 如:`db/footprint`
+//  @param filter SQL脚本过滤条件
 //  @return []*EmbedSqlFileInfo 嵌入SQL文件信息结构体数组(切片)
 //  @return error
-func ReadEmbedSqlByDirName(embedFs *embed.FS, dirPath string) ([]*EmbedSqlFileInfo, error) {
+func ReadEmbedSqlByDirName(embedFs *embed.FS, dirPath string, filters map[string]SqlScriptFilter) ([]*EmbedSqlFileInfo, error) {
 	files := make([]*EmbedSqlFileInfo, 0)
 
 	entries, err := embedFs.ReadDir(dirPath)
@@ -75,56 +90,72 @@ func ReadEmbedSqlByDirName(embedFs *embed.FS, dirPath string) ([]*EmbedSqlFileIn
 		path := filepath.Join(dirPath, name)
 		isDir := entry.IsDir()
 		if isDir {
-			subFiles, err := ReadEmbedSqlByDirName(embedFs, path)
+			subFiles, err := ReadEmbedSqlByDirName(embedFs, path, filters)
 			if err != nil {
 				return nil, err
 			}
 			files = append(files, subFiles...)
 		} else {
-			fileBytes, err := embedFs.ReadFile(path)
+			fileInfo, err := createFileInfo(name, path)
 			if err != nil {
 				return nil, err
 			}
-			fileInfo := EmbedSqlFileInfo{
-				Name:    name,
-				Path:    path,
-				Content: string(fileBytes),
+			if filters != nil {
+				sqlFilter := filters[fileInfo.BusinessSpace]
+				// 比较当前脚本的版本是否是增量
+				if filterIncreaseFileInfoByVersions(fileInfo, sqlFilter) {
+					fileBytes, err := embedFs.ReadFile(path)
+					if err != nil {
+						return nil, err
+					}
+					fileInfo.Content = string(fileBytes)
+					files = append(files, &fileInfo)
+				}
+			} else {
+				fileBytes, err := embedFs.ReadFile(path)
+				if err != nil {
+					return nil, err
+				}
+				fileInfo.Content = string(fileBytes)
+				files = append(files, &fileInfo)
 			}
-			err = FilledDetailsFromSqlFileName(&fileInfo)
-			files = append(files, &fileInfo)
 		}
 	}
 	return files, nil
 }
 
-// FilledDetailsFromSqlFileName 根据SQL文件名填充细节
+// createFileInfo 根据SQL文件名填充细节
 //  @param fileInfo 嵌入SQL文件信息结构体
 //  @return error
-func FilledDetailsFromSqlFileName(fileInfo *EmbedSqlFileInfo) error {
+func createFileInfo(name string, path string) (EmbedSqlFileInfo, error) {
+	fileInfo := EmbedSqlFileInfo{
+		Name: name,
+		Path: path,
+	}
 	// 优先使用默认的正则表达式解析SQL文件名
-	matcherDefault := PTN_SCRIPT_NAME_DEFAULT.FindAllStringSubmatch(fileInfo.Name, -1)
+	matcherDefault := PTN_SCRIPT_NAME_DEFAULT.FindAllStringSubmatch(name, -1)
 	if len(matcherDefault) > 0 {
 		for _, strMatched := range matcherDefault {
 			if len(strMatched) == 6 {
 				fileInfo.BusinessSpace = strMatched[1]
 				major, err := strconv.ParseInt(strMatched[2], 10, 64)
 				if err != nil {
-					return err
+					return fileInfo, err
 				}
 				fileInfo.MajorVersion = major
 				minor, err := strconv.ParseInt(strMatched[3], 10, 64)
 				if err != nil {
-					return err
+					return fileInfo, err
 				}
 				fileInfo.MinorVersion = minor
 				patch, err := strconv.ParseInt(strMatched[4], 10, 64)
 				if err != nil {
-					return err
+					return fileInfo, err
 				}
 				fileInfo.PatchVersion = patch
 				fileInfo.CustomName = strMatched[5]
 				fileInfo.Version = fmt.Sprintf("%s_V%d.%d.%d", fileInfo.BusinessSpace, major, minor, patch)
-				return nil
+				return fileInfo, nil
 			}
 		}
 	} else {
@@ -135,30 +166,43 @@ func FilledDetailsFromSqlFileName(fileInfo *EmbedSqlFileInfo) error {
 				fileInfo.BusinessSpace = strMatched[1]
 				major, err := strconv.ParseInt(strMatched[2], 10, 64)
 				if err != nil {
-					return err
+					return fileInfo, err
 				}
 				fileInfo.MajorVersion = major
 				minor, err := strconv.ParseInt(strMatched[3], 10, 64)
 				if err != nil {
-					return err
+					return fileInfo, err
 				}
 				fileInfo.MinorVersion = minor
 				patch, err := strconv.ParseInt(strMatched[4], 10, 64)
 				if err != nil {
-					return err
+					return fileInfo, err
 				}
 				fileInfo.PatchVersion = patch
 				extend, err := strconv.ParseInt(strMatched[5], 10, 64)
 				if err != nil {
-					return err
+					return fileInfo, err
 				}
 				fileInfo.ExtendVersion = extend
 				fileInfo.CustomName = strMatched[6]
 				fileInfo.Version = fmt.Sprintf("%s_V%d.%d.%d.%d", fileInfo.BusinessSpace, major, minor, patch, extend)
-				return nil
+				return fileInfo, nil
 			}
 		}
 	}
 	// 解析失败
-	return fmt.Errorf("sqlFileName未能正确匹配正则表达式: %s", fileInfo.Name)
+	return fileInfo, fmt.Errorf("sqlFileName未能正确匹配正则表达式: %s", fileInfo.Name)
+}
+
+func filterIncreaseFileInfoByVersions(fileInfo EmbedSqlFileInfo, filter SqlScriptFilter) bool {
+	if fileInfo.MajorVersion == filter.MajorVersion {
+		if fileInfo.MinorVersion == filter.MinorVersion {
+			if fileInfo.PatchVersion == filter.PatchVersion {
+				return fileInfo.ExtendVersion > filter.ExtendVersion
+			}
+			return fileInfo.PatchVersion > filter.PatchVersion
+		}
+		return fileInfo.MinorVersion > filter.MinorVersion
+	}
+	return fileInfo.MajorVersion > filter.MajorVersion
 }

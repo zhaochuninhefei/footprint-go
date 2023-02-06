@@ -12,21 +12,17 @@ import (
 )
 
 func TestPrintEmbedFs(t *testing.T) {
-	fmt.Println("db/beforeclass 下的文件")
-	files, err := ReadEmbedSqlByDirName(&resources.DBFilesTest, "db/beforeclass")
-	if err != nil {
-		t.Fatal(err)
-	}
-	for _, fileInfo := range files {
-		jsonFileInfo, _ := json.Marshal(fileInfo)
-		fmt.Println(string(jsonFileInfo))
-		//fmt.Printf("文件名: %s, 访问路径: %s\n", fileInfo.Name, fileInfo.Path)
-		//fmt.Printf("文件名: %s, 访问路径: %s, \n文件内容:\n----------\n%s\n----------\n", fileInfo.name, fileInfo.Path, fileInfo.content)
-	}
-
 	fmt.Println()
 	fmt.Println("db/test01 下的文件")
-	files, err = ReadEmbedSqlByDirName(&resources.DBFilesTest, "db/test01")
+	filter := make(map[string]SqlScriptFilter)
+	filter["template"] = SqlScriptFilter{
+		BusinessSpace: "template",
+		MajorVersion:  1,
+		MinorVersion:  0,
+		PatchVersion:  12,
+		ExtendVersion: 0,
+	}
+	files, err := ReadEmbedSqlByDirName(&resources.DBFilesTest, "db/test01", filter)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -39,7 +35,7 @@ func TestPrintEmbedFs(t *testing.T) {
 
 	fmt.Println()
 	fmt.Println("db/test02 下的文件")
-	files, err = ReadEmbedSqlByDirName(&resources.DBFilesTest, "db/test02")
+	files, err = ReadEmbedSqlByDirName(&resources.DBFilesTest, "db/test02", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -52,7 +48,7 @@ func TestPrintEmbedFs(t *testing.T) {
 
 	fmt.Println()
 	fmt.Println("db/test03 下的文件")
-	files, err = ReadEmbedSqlByDirName(&resources.DBFilesTest, "db/test03")
+	files, err = ReadEmbedSqlByDirName(&resources.DBFilesTest, "db/test03", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -65,7 +61,7 @@ func TestPrintEmbedFs(t *testing.T) {
 
 	fmt.Println()
 	fmt.Println("db/test04 下的文件")
-	files, err = ReadEmbedSqlByDirName(&resources.DBFilesTest, "db/test04")
+	files, err = ReadEmbedSqlByDirName(&resources.DBFilesTest, "db/test04", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -78,7 +74,7 @@ func TestPrintEmbedFs(t *testing.T) {
 
 	fmt.Println()
 	fmt.Println("db/test05 下的文件")
-	files, err = ReadEmbedSqlByDirName(&resources.DBFilesTest, "db/test05")
+	files, err = ReadEmbedSqlByDirName(&resources.DBFilesTest, "db/test05", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -91,20 +87,7 @@ func TestPrintEmbedFs(t *testing.T) {
 
 	fmt.Println()
 	fmt.Println("db/test06 下的文件")
-	files, err = ReadEmbedSqlByDirName(&resources.DBFilesTest, "db/test06")
-	if err != nil {
-		t.Fatal(err)
-	}
-	for _, fileInfo := range files {
-		jsonFileInfo, _ := json.Marshal(fileInfo)
-		fmt.Println(string(jsonFileInfo))
-		//fmt.Printf("文件名: %s, 访问路径: %s\n", fileInfo.Name, fileInfo.Path)
-		//fmt.Printf("文件名: %s, 访问路径: %s, \n文件内容:\n----------\n%s\n----------\n", fileInfo.name, fileInfo.Path, fileInfo.content)
-	}
-
-	fmt.Println()
-	fmt.Println("db 下的文件")
-	files, err = ReadEmbedSqlByDirName(&resources.DBFilesTest, "db")
+	files, err = ReadEmbedSqlByDirName(&resources.DBFilesTest, "db/test06", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -118,10 +101,7 @@ func TestPrintEmbedFs(t *testing.T) {
 
 func TestAnalyzeDetailsFromSqlFileName(t *testing.T) {
 	fmt.Println("---- bsTest_V1.2.3_init_test.sql ----")
-	fileInfo1 := &EmbedSqlFileInfo{
-		Name: "bsTest_V1.2.3_init_test.sql",
-	}
-	err := FilledDetailsFromSqlFileName(fileInfo1)
+	fileInfo1, err := createFileInfo("bsTest_V1.2.3_init_test.sql", "")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -129,10 +109,7 @@ func TestAnalyzeDetailsFromSqlFileName(t *testing.T) {
 	fmt.Println(string(jsonFileInfo1))
 
 	fmt.Println("---- bsTest_V1.2.3.4_init_test.sql ----")
-	fileInfo2 := &EmbedSqlFileInfo{
-		Name: "bsTest_V1.2.3.4_init_test.sql",
-	}
-	err = FilledDetailsFromSqlFileName(fileInfo2)
+	fileInfo2, err := createFileInfo("bsTest_V1.2.3.4_init_test.sql", "")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -140,10 +117,7 @@ func TestAnalyzeDetailsFromSqlFileName(t *testing.T) {
 	fmt.Println(string(jsonFileInfo2))
 
 	fmt.Println("---- bsTest_V1.2.3.4.5_init_test.sql ----")
-	fileInfo3 := &EmbedSqlFileInfo{
-		Name: "bsTest_V1.2.3.4.5_init_test.sql",
-	}
-	err = FilledDetailsFromSqlFileName(fileInfo3)
+	fileInfo3, err := createFileInfo("bsTest_V1.2.3.4.5_init_test.sql", "")
 	if err != nil {
 		if strings.HasPrefix(err.Error(), "sqlFileName未能正确匹配正则表达式:") {
 			fmt.Println("返回了正确的错误信息")
@@ -159,7 +133,7 @@ func TestAnalyzeDetailsFromSqlFileName(t *testing.T) {
 }
 
 func TestGroupAndSort(t *testing.T) {
-	allFileInfos, err := ReadEmbedSqlByDirName(&resources.DBFilesTest, "db")
+	allFileInfos, err := ReadEmbedSqlByDirName(&resources.DBFilesTest, "db", nil)
 	if err != nil {
 		t.Fatal(err)
 	}

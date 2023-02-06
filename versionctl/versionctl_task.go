@@ -10,7 +10,9 @@ import (
 	"gitee.com/zhaochuninhefei/zcutils-go/zctime"
 	"gorm.io/gorm"
 	"io/ioutil"
+	"regexp"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -112,19 +114,27 @@ type DropVersionTblTask struct {
 //  @receiver dvtt 数据库版本控制表删除任务
 //  @return error
 func (dvtt *DropVersionTblTask) RunTask() error {
+	zclog.Info("DropVersionTblTask begin...")
 	dbVersionTableName := dvtt.props.DbVersionTableName
 	err := dvtt.dbClient.Migrator().DropTable(dbVersionTableName)
 	if err != nil {
 		return err
 	}
+	zclog.Info("DropVersionTblTask end...")
 	return nil
 }
 
+// IncreaseVersionTask 增量SQL执行任务
 type IncreaseVersionTask struct {
+	// 嵌入上下文
 	DbVersionCtlContext
 }
 
+// RunTask 执行增量SQL任务
+//  @receiver ivt 增量SQL执行任务
+//  @return error
 func (ivt *IncreaseVersionTask) RunTask() error {
+	zclog.Info("IncreaseVersionTask begin...")
 
 	// 从数据库版本控制表读取各个业务空间的最新版本
 	versionCtls := make([]model.BroodDbVersionCtl, 0)
@@ -266,10 +276,11 @@ func (ivt *IncreaseVersionTask) RunTask() error {
 			if err != nil {
 				return err
 			}
-			zclog.Infof("数据库版本记录更新, business_space: %s , major_version: %s , minor_version: %s , patch_version: %s , extend_version: %s .",
+			zclog.Infof("数据库版本记录更新, business_space: %s , major_version: %d , minor_version: %d , patch_version: %d , extend_version: %d .",
 				scriptInfo.BusinessSpace, scriptInfo.MajorVersion, scriptInfo.MinorVersion, scriptInfo.PatchVersion, scriptInfo.ExtendVersion)
 		}
 	}
+	zclog.Info("IncreaseVersionTask end...")
 	return nil
 }
 
@@ -277,4 +288,115 @@ func (ivt *IncreaseVersionTask) RunTask() error {
 type InsertBaselineTask struct {
 	// 嵌入上下文
 	DbVersionCtlContext
+}
+
+// PTN_VERSION_DEFAULT 基线版本正则表达式(默认)
+//goland:noinspection GoSnakeCaseUsage
+var PTN_VERSION_DEFAULT *regexp.Regexp
+
+// PTN_VERSION_EXTEND 基线版本正则表达式(带扩展版本号)
+//goland:noinspection GoSnakeCaseUsage
+var PTN_VERSION_EXTEND *regexp.Regexp
+
+// init 初始化基线版本正则表达式
+func init() {
+	PTN_VERSION_DEFAULT = regexp.MustCompile("^([A-Za-z0-9]+)_V(\\d+)\\.(\\d+)\\.(\\d+)$")
+	if PTN_VERSION_DEFAULT == nil {
+		panic("正则表达式不正确: ^([A-Za-z0-9]+)_V(\\d+)\\.(\\d+)\\.(\\d+)$")
+	}
+	PTN_VERSION_EXTEND = regexp.MustCompile("^([A-Za-z0-9]+)_V(\\d+)\\.(\\d+)\\.(\\d+)\\.(\\d+)$")
+	if PTN_VERSION_EXTEND == nil {
+		panic("正则表达式不正确: ^([A-Za-z0-9]+)_V(\\d+)\\.(\\d+)\\.(\\d+)\\.(\\d+)$")
+	}
+}
+
+func (ibt *InsertBaselineTask) RunTask() error {
+	zclog.Info("InsertBaselineTask begin...")
+
+	// 生成数据库版本插入SQL语句
+	insertSql := strings.ReplaceAll(sqlInsertVersionCtl, defaultDbVersionTableName, ibt.props.DbVersionTableName)
+
+	// 获取基线版本信息
+	baselineArr := strings.Split(strings.TrimSpace(ibt.props.BaselineBusinessSpaceAndVersions), ",")
+	insertTimes := 0
+	for _, version := range baselineArr {
+		version = strings.TrimSpace(version)
+		if version == "" {
+			continue
+		}
+		var bs string
+		var major, minor, patch, extend int64
+		var err error
+		matched := false
+		matcherDefault := PTN_VERSION_DEFAULT.FindAllStringSubmatch(version, -1)
+		if len(matcherDefault) > 0 {
+			for _, strMatched := range matcherDefault {
+				if len(strMatched) == 5 {
+					bs = strMatched[1]
+					major, err = strconv.ParseInt(strMatched[2], 10, 64)
+					if err != nil {
+						return err
+					}
+					minor, err = strconv.ParseInt(strMatched[3], 10, 64)
+					if err != nil {
+						return err
+					}
+					patch, err = strconv.ParseInt(strMatched[4], 10, 64)
+					if err != nil {
+						return err
+					}
+					extend = 0
+					matched = true
+					break
+				}
+			}
+		} else {
+			// 使用带扩展版本号的正则表达式解析SQL文件名
+			matcherExtend := PTN_VERSION_EXTEND.FindAllStringSubmatch(version, -1)
+			for _, strMatched := range matcherExtend {
+				if len(strMatched) == 6 {
+					bs = strMatched[1]
+					major, err = strconv.ParseInt(strMatched[2], 10, 64)
+					if err != nil {
+						return err
+					}
+					minor, err = strconv.ParseInt(strMatched[3], 10, 64)
+					if err != nil {
+						return err
+					}
+					patch, err = strconv.ParseInt(strMatched[4], 10, 64)
+					if err != nil {
+						return err
+					}
+					extend, err = strconv.ParseInt(strMatched[5], 10, 64)
+					if err != nil {
+						return err
+					}
+					matched = true
+					break
+				}
+			}
+		}
+		if !matched {
+			return fmt.Errorf("数据库基线版本(BaselineBusinessSpaceAndVersions)配置格式错误: %s",
+				ibt.props.DbVersionTableName)
+		}
+		// 插入数据库版本控制的基线版本记录
+		result := ibt.dbClient.Exec(insertSql, bs, major, minor,
+			patch, extend, version, "none", "BaseLine", "none", "none", 1, 0,
+			time.Now().Format(zctime.TIME_FORMAT_DASH), ibt.props.Username)
+		if result.Error != nil {
+			return result.Error
+		}
+		insertTimes++
+		zclog.Infof("数据库基线版本添加, business_space: %s , major_version: %d , minor_version: %d , patch_version: %d, extend_version: %d .",
+			bs, major, minor, patch, extend)
+	}
+	if insertTimes == 0 {
+		return fmt.Errorf("未能成功执行任何基线版本记录插入，请检查数据库基线版本(BaselineBusinessSpaceAndVersions)配置: %s",
+			ibt.props.DbVersionTableName)
+	}
+
+	zclog.Info("InsertBaselineTask end...")
+	return nil
 }

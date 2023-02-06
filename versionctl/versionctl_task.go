@@ -310,6 +310,9 @@ func init() {
 	}
 }
 
+// RunTask 执行数据库基线版本记录插入任务
+//  @receiver ibt 数据库基线版本记录插入任务
+//  @return error
 func (ibt *InsertBaselineTask) RunTask() error {
 	zclog.Info("InsertBaselineTask begin...")
 
@@ -328,6 +331,7 @@ func (ibt *InsertBaselineTask) RunTask() error {
 		var major, minor, patch, extend int64
 		var err error
 		matched := false
+		// 默认使用不带扩展版本号的正则表达式
 		matcherDefault := PTN_VERSION_DEFAULT.FindAllStringSubmatch(version, -1)
 		if len(matcherDefault) > 0 {
 			for _, strMatched := range matcherDefault {
@@ -351,7 +355,7 @@ func (ibt *InsertBaselineTask) RunTask() error {
 				}
 			}
 		} else {
-			// 使用带扩展版本号的正则表达式解析SQL文件名
+			// 使用带扩展版本号的正则表达式
 			matcherExtend := PTN_VERSION_EXTEND.FindAllStringSubmatch(version, -1)
 			for _, strMatched := range matcherExtend {
 				if len(strMatched) == 6 {

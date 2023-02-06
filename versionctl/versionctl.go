@@ -33,14 +33,17 @@ func DoDBVersionControl(existDB *gorm.DB, props *DbVersionCtlProps, dbFS *embed.
 	tasks := make([]DbVersionCtlTask, 0)
 	switch operationMode {
 	case DEPLOY_INIT:
+		zclog.Info("本次数据库版本控制的操作模式为 DEPLOY_INIT")
 		// 创建数据库版本控制表
 		tasks = append(tasks, makeCreateVersionTblTask())
 	case BASELINE_INIT:
+		zclog.Info("本次数据库版本控制的操作模式为 BASELINE_INIT")
 		// 创建数据库版本控制表
 		tasks = append(tasks, makeCreateVersionTblTask())
 		// 插入基线版本记录
 		tasks = append(tasks, makeInsertBaselineTask(dbFS))
 	case BASELINE_RESET:
+		zclog.Info("本次数据库版本控制的操作模式为 BASELINE_RESET")
 		// 删除数据库版本控制表
 		tasks = append(tasks, makeDropVersionTblTask(dbFS))
 		// 创建数据库版本控制表
@@ -48,6 +51,7 @@ func DoDBVersionControl(existDB *gorm.DB, props *DbVersionCtlProps, dbFS *embed.
 		// 插入基线版本记录
 		tasks = append(tasks, makeInsertBaselineTask(dbFS))
 	case DEPLOY_INCREASE:
+		zclog.Info("本次数据库版本控制的操作模式为 DEPLOY_INCREASE")
 	default:
 		return fmt.Errorf("不支持的数据库版本控制操作模式: %d", operationMode)
 	}

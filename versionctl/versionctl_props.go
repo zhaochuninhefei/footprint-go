@@ -28,9 +28,11 @@ type DbVersionCtlProps struct {
 	BaselineBusinessSpaceAndVersions string `json:"baseline_business_space_and_versions" yaml:"baseline_business_space_and_versions" mapstructure:"baseline_business_space_and_versions"`
 
 	// DbVersionTableName 数据库版本管理表，默认"brood_db_version_ctl"
+	//  注意要与DbVersionTableCreateSqlPath对应的建表文中的表名保持一致。
 	DbVersionTableName string `json:"db_version_table_name" yaml:"db_version_table_name" mapstructure:"db_version_table_name"`
 
 	// DbVersionTableCreateSqlPath 数据库版本管理表建表文路径，默认 embedfs:db/versionctl/create_brood_db_version_ctl.sql
+	//  注意该路径的建表文中的表名要与DbVersionTableName保持一致。
 	DbVersionTableCreateSqlPath string `json:"db_version_table_create_sql_path" yaml:"db_version_table_create_sql_path" mapstructure:"db_version_table_create_sql_path"`
 
 	// DriverClassName 数据库驱动名, 目前只支持mysql

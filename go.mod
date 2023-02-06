@@ -4,6 +4,7 @@ go 1.17
 
 require (
 	gitee.com/zhaochuninhefei/zcgolog v0.0.16
+	gitee.com/zhaochuninhefei/zcutils-go v0.0.2
 	gorm.io/driver/mysql v1.4.5
 	gorm.io/gen v0.3.20
 	gorm.io/gorm v1.24.3

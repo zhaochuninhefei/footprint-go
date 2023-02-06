@@ -10,15 +10,15 @@ import (
 //  @param dbClient 数据库客户端
 //  @param sqlScript SQL脚本内容
 //  @return error
-func RunSqlScript(dbClient *gorm.DB, sqlScript string) error {
+func RunSqlScript(tx *gorm.DB, sqlScript string) error {
 	sqls, err := ReadSqls(sqlScript)
 	if err != nil {
 		return err
 	}
 	for _, sql := range sqls {
 		zclog.Infof("执行sql: %s", sql)
-		db := dbClient.Exec(sql)
-		if err = db.Error; err != nil {
+		result := tx.Exec(sql)
+		if err = result.Error; err != nil {
 			return err
 		}
 	}

@@ -256,18 +256,39 @@ func filterIncreaseFileInfoByVersions(fileInfo SqlScriptInfo, filter SqlScriptFi
 	return fileInfo.MajorVersion > filter.MajorVersion
 }
 
+// SqlScriptReader SQL脚本阅读器接口
 type SqlScriptReader interface {
+	// ReadDir 读取目录
+	//  @param dirPath 目录访问路径
+	//  @return []fs.DirEntry 目录条目
+	//  @return error
 	ReadDir(dirPath string) ([]fs.DirEntry, error)
+
+	// ReadFile 读取文件
+	//  @param filePath 文件访问路径
+	//  @return []byte
+	//  @return error
 	ReadFile(filePath string) ([]byte, error)
 }
 
+// FSSqlReader 文件系统SQL脚本阅读器
 type FSSqlReader struct {
 }
 
+// ReadDir 读取目录
+//  @receiver f 文件系统SQL脚本阅读器
+//  @param dirPath 目录访问路径
+//  @return []fs.DirEntry 目录条目
+//  @return error
 func (f *FSSqlReader) ReadDir(dirPath string) ([]fs.DirEntry, error) {
 	return os.ReadDir(dirPath)
 }
 
+// ReadFile 读取文件
+//  @receiver f 文件系统SQL脚本阅读器
+//  @param filePath 文件访问路径
+//  @return []byte
+//  @return error
 func (f *FSSqlReader) ReadFile(filePath string) ([]byte, error) {
 	return os.ReadFile(filePath)
 }

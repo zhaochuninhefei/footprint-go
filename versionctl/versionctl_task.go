@@ -270,6 +270,11 @@ func (ivt *IncreaseVersionTask) RunTask() error {
 				scriptInfo.BusinessSpace, scriptInfo.MajorVersion, scriptInfo.MinorVersion, scriptInfo.PatchVersion, scriptInfo.ExtendVersion)
 		}
 	}
-
 	return nil
+}
+
+// InsertBaselineTask 数据库基线版本记录插入任务
+type InsertBaselineTask struct {
+	// 嵌入上下文
+	DbVersionCtlContext
 }

@@ -11,7 +11,7 @@ import (
 	"testing"
 )
 
-func TestPrintEmbedFs(t *testing.T) {
+func TestReadSql(t *testing.T) {
 	fmt.Println()
 	fmt.Println("db/test01 下的文件")
 	filter := make(map[string]SqlScriptFilter)
@@ -22,7 +22,7 @@ func TestPrintEmbedFs(t *testing.T) {
 		PatchVersion:  12,
 		ExtendVersion: 0,
 	}
-	files, err := ReadEmbedSql(&resources.DBFilesTest, "db/test01", filter)
+	files, err := ReadSql(&resources.DBFilesTest, "db/test01", filter)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -35,7 +35,7 @@ func TestPrintEmbedFs(t *testing.T) {
 
 	fmt.Println()
 	fmt.Println("db/test02 下的文件")
-	files, err = ReadEmbedSql(&resources.DBFilesTest, "db/test02", nil)
+	files, err = ReadSql(&FSSqlReader{}, "../test/resources/db/test02", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -48,7 +48,7 @@ func TestPrintEmbedFs(t *testing.T) {
 
 	fmt.Println()
 	fmt.Println("db/test03 下的文件")
-	files, err = ReadEmbedSql(&resources.DBFilesTest, "db/test03", nil)
+	files, err = ReadSql(&resources.DBFilesTest, "db/test03", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -61,7 +61,7 @@ func TestPrintEmbedFs(t *testing.T) {
 
 	fmt.Println()
 	fmt.Println("db/test04 下的文件")
-	files, err = ReadEmbedSql(&resources.DBFilesTest, "db/test04", nil)
+	files, err = ReadSql(&resources.DBFilesTest, "db/test04", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -74,7 +74,7 @@ func TestPrintEmbedFs(t *testing.T) {
 
 	fmt.Println()
 	fmt.Println("db/test05 下的文件")
-	files, err = ReadEmbedSql(&resources.DBFilesTest, "db/test05", nil)
+	files, err = ReadSql(&resources.DBFilesTest, "db/test05", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -87,7 +87,7 @@ func TestPrintEmbedFs(t *testing.T) {
 
 	fmt.Println()
 	fmt.Println("db/test06 下的文件")
-	files, err = ReadEmbedSql(&resources.DBFilesTest, "db/test06", nil)
+	files, err = ReadSql(&resources.DBFilesTest, "db/test06", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -133,7 +133,7 @@ func TestAnalyzeDetailsFromSqlFileName(t *testing.T) {
 }
 
 func TestGroupAndSort(t *testing.T) {
-	allFileInfos, err := ReadEmbedSql(&resources.DBFilesTest, "db", nil)
+	allFileInfos, err := ReadSql(&resources.DBFilesTest, "db", nil)
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -1,8 +1,9 @@
 package versionctl
 
 import (
-	"embed"
 	"fmt"
+	"io/fs"
+	"os"
 	"path/filepath"
 	"regexp"
 	"strconv"
@@ -77,10 +78,57 @@ func init() {
 //  @param filter SQL脚本过滤条件
 //  @return []*SqlScriptInfo 嵌入SQL文件信息结构体数组(切片)
 //  @return error
-func ReadEmbedSql(embedFs *embed.FS, dirPath string, filters map[string]SqlScriptFilter) ([]*SqlScriptInfo, error) {
+//func ReadEmbedSql(embedFs *embed.FS, dirPath string, filters map[string]SqlScriptFilter) ([]*SqlScriptInfo, error) {
+//	files := make([]*SqlScriptInfo, 0)
+//
+//	entries, err := embedFs.ReadDir(dirPath)
+//	if err != nil {
+//		return nil, err
+//	}
+//
+//	for _, entry := range entries {
+//		name := entry.Name()
+//		path := filepath.Join(dirPath, name)
+//		isDir := entry.IsDir()
+//		if isDir {
+//			subFiles, err := ReadEmbedSql(embedFs, path, filters)
+//			if err != nil {
+//				return nil, err
+//			}
+//			files = append(files, subFiles...)
+//		} else {
+//			fileInfo, err := createFileInfo(name, path)
+//			if err != nil {
+//				return nil, err
+//			}
+//			if filters != nil {
+//				sqlFilter := filters[fileInfo.BusinessSpace]
+//				// 比较当前脚本的版本是否是增量
+//				if filterIncreaseFileInfoByVersions(fileInfo, sqlFilter) {
+//					fileBytes, err := embedFs.ReadFile(path)
+//					if err != nil {
+//						return nil, err
+//					}
+//					fileInfo.Content = string(fileBytes)
+//					files = append(files, &fileInfo)
+//				}
+//			} else {
+//				fileBytes, err := embedFs.ReadFile(path)
+//				if err != nil {
+//					return nil, err
+//				}
+//				fileInfo.Content = string(fileBytes)
+//				files = append(files, &fileInfo)
+//			}
+//		}
+//	}
+//	return files, nil
+//}
+
+func ReadSql(reader SqlScriptReader, dirPath string, filters map[string]SqlScriptFilter) ([]*SqlScriptInfo, error) {
 	files := make([]*SqlScriptInfo, 0)
 
-	entries, err := embedFs.ReadDir(dirPath)
+	entries, err := reader.ReadDir(dirPath)
 	if err != nil {
 		return nil, err
 	}
@@ -90,7 +138,7 @@ func ReadEmbedSql(embedFs *embed.FS, dirPath string, filters map[string]SqlScrip
 		path := filepath.Join(dirPath, name)
 		isDir := entry.IsDir()
 		if isDir {
-			subFiles, err := ReadEmbedSql(embedFs, path, filters)
+			subFiles, err := ReadSql(reader, path, filters)
 			if err != nil {
 				return nil, err
 			}
@@ -104,7 +152,7 @@ func ReadEmbedSql(embedFs *embed.FS, dirPath string, filters map[string]SqlScrip
 				sqlFilter := filters[fileInfo.BusinessSpace]
 				// 比较当前脚本的版本是否是增量
 				if filterIncreaseFileInfoByVersions(fileInfo, sqlFilter) {
-					fileBytes, err := embedFs.ReadFile(path)
+					fileBytes, err := reader.ReadFile(path)
 					if err != nil {
 						return nil, err
 					}
@@ -112,7 +160,7 @@ func ReadEmbedSql(embedFs *embed.FS, dirPath string, filters map[string]SqlScrip
 					files = append(files, &fileInfo)
 				}
 			} else {
-				fileBytes, err := embedFs.ReadFile(path)
+				fileBytes, err := reader.ReadFile(path)
 				if err != nil {
 					return nil, err
 				}
@@ -121,6 +169,7 @@ func ReadEmbedSql(embedFs *embed.FS, dirPath string, filters map[string]SqlScrip
 			}
 		}
 	}
+
 	return files, nil
 }
 
@@ -205,4 +254,20 @@ func filterIncreaseFileInfoByVersions(fileInfo SqlScriptInfo, filter SqlScriptFi
 		return fileInfo.MinorVersion > filter.MinorVersion
 	}
 	return fileInfo.MajorVersion > filter.MajorVersion
+}
+
+type SqlScriptReader interface {
+	ReadDir(dirPath string) ([]fs.DirEntry, error)
+	ReadFile(filePath string) ([]byte, error)
+}
+
+type FSSqlReader struct {
+}
+
+func (f *FSSqlReader) ReadDir(dirPath string) ([]fs.DirEntry, error) {
+	return os.ReadDir(dirPath)
+}
+
+func (f *FSSqlReader) ReadFile(filePath string) ([]byte, error) {
+	return os.ReadFile(filePath)
 }

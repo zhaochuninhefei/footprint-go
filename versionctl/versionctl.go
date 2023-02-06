@@ -26,6 +26,7 @@ func DoDBVersionControl(existDB *gorm.DB, props *DbVersionCtlProps, dbFS *embed.
 	// 判断本次数据库版本控制的操作模式
 	operationMode := chargeOperationMode()
 
+	// 根据操作模式组装任务链
 	tasks := make([]DbVersionCtlTask, 0)
 	switch operationMode {
 	case DEPLOY_INIT:
@@ -45,6 +46,7 @@ func DoDBVersionControl(existDB *gorm.DB, props *DbVersionCtlProps, dbFS *embed.
 		return fmt.Errorf("不支持的数据库版本控制操作模式: %d", operationMode)
 	}
 
+	// 按顺序执行任务链
 	for _, task := range tasks {
 		err := task.RunTask()
 		if err != nil {

@@ -30,6 +30,7 @@ func DoDBVersionControl(existDB *gorm.DB, props *DbVersionCtlProps, dbFS *embed.
 	tasks := make([]DbVersionCtlTask, 0)
 	switch operationMode {
 	case DEPLOY_INIT:
+		// 创建数据库版本控制表
 		createVersionTblTask := &CreateVersionTblTask{
 			DbVersionCtlContext: DbVersionCtlContext{
 				dbClient: dbClient,
@@ -45,6 +46,16 @@ func DoDBVersionControl(existDB *gorm.DB, props *DbVersionCtlProps, dbFS *embed.
 	default:
 		return fmt.Errorf("不支持的数据库版本控制操作模式: %d", operationMode)
 	}
+	// 执行增量SQL
+	increaseVersionTask := &IncreaseVersionTask{
+		DbVersionCtlContext: DbVersionCtlContext{
+			dbClient: dbClient,
+			props:    ctlProps,
+			dbFS:     dbFS,
+			lastTask: true,
+		},
+	}
+	tasks = append(tasks, increaseVersionTask)
 
 	// 按顺序执行任务链
 	for _, task := range tasks {

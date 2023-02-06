@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"gitee.com/zhaochuninhefei/footprint-go/db/mysql"
 	"gitee.com/zhaochuninhefei/footprint-go/resources"
+	"gitee.com/zhaochuninhefei/zcgolog/zclog"
 	"gorm.io/gorm"
 	"strings"
 )
@@ -16,6 +17,8 @@ var ctlProps *DbVersionCtlProps
 var dbClient *gorm.DB
 
 func DoDBVersionControl(existDB *gorm.DB, props *DbVersionCtlProps, dbFS *embed.FS) error {
+	zclog.Info("执行数据库版本控制操作(DoDBVersionControl) 开始...")
+
 	ctlProps = FillDefaultFields(props)
 	var err error
 	dbClient, err = mysql.ConnectMysqlByDefault(existDB, props.Host, props.Port, props.Username, props.Password, props.Database)
@@ -58,7 +61,7 @@ func DoDBVersionControl(existDB *gorm.DB, props *DbVersionCtlProps, dbFS *embed.
 			return err
 		}
 	}
-
+	zclog.Info("执行数据库版本控制操作(DoDBVersionControl) 结束...")
 	return nil
 }
 

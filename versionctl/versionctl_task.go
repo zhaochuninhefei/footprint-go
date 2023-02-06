@@ -58,3 +58,12 @@ func (cvtt *CreateVersionTblTask) RunTask() error {
 	zclog.Info("CreateVersionTblTask end...")
 	return nil
 }
+
+type DropVersionTblTask struct {
+	DbVersionCtlContext
+}
+
+func (dvtt *DropVersionTblTask) RunTask() error {
+
+	return nil
+}

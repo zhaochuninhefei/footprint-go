@@ -10,10 +10,14 @@ import (
 	"strings"
 )
 
+// DbVersionCtlTask 数据库版本控制任务接口
 type DbVersionCtlTask interface {
+	// RunTask 执行任务
+	//  @return error
 	RunTask() error
 }
 
+// DbVersionCtlContext 数据库版本控制上下文
 type DbVersionCtlContext struct {
 	dbClient *gorm.DB           // 数据库客户端
 	props    *DbVersionCtlProps // 版本控制配置
@@ -21,10 +25,15 @@ type DbVersionCtlContext struct {
 	lastTask bool               // 是否最后一个任务
 }
 
+// CreateVersionTblTask 数据库版本控制表创建任务
 type CreateVersionTblTask struct {
+	// 嵌入上下文
 	DbVersionCtlContext
 }
 
+// RunTask 执行数据库版本控制表创建任务
+//  @receiver cvtt 数据库版本控制表创建任务
+//  @return error
 func (cvtt *CreateVersionTblTask) RunTask() error {
 	zclog.Info("CreateVersionTblTask begin...")
 	dbVersionTableCreateSqlPath := cvtt.props.DbVersionTableCreateSqlPath
@@ -59,11 +68,20 @@ func (cvtt *CreateVersionTblTask) RunTask() error {
 	return nil
 }
 
+// DropVersionTblTask 数据库版本控制表删除任务
 type DropVersionTblTask struct {
+	// 嵌入上下文
 	DbVersionCtlContext
 }
 
+// RunTask 执行数据库版本控制表删除任务
+//  @receiver dvtt 数据库版本控制表删除任务
+//  @return error
 func (dvtt *DropVersionTblTask) RunTask() error {
-
+	dbVersionTableName := dvtt.props.DbVersionTableName
+	err := dvtt.dbClient.Migrator().DropTable(dbVersionTableName)
+	if err != nil {
+		return err
+	}
 	return nil
 }

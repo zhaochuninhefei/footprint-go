@@ -2,6 +2,10 @@ package versionctl
 
 type ScriptResourceMode string
 
+func (srm ScriptResourceMode) String() string {
+	return srm.String()
+}
+
 //goland:noinspection GoUnusedConst
 const (
 	EMBEDFS    ScriptResourceMode = "embedfs"

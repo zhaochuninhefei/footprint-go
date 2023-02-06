@@ -2,12 +2,28 @@ package versionctl
 
 import (
 	"embed"
+	"errors"
 	"fmt"
+	"gitee.com/zhaochuninhefei/footprint-go/db/model"
 	"gitee.com/zhaochuninhefei/footprint-go/utils"
 	"gitee.com/zhaochuninhefei/zcgolog/zclog"
 	"gorm.io/gorm"
 	"io/ioutil"
 	"strings"
+)
+
+//goland:noinspection SqlResolve,GoUnusedConst
+const (
+	sqlGetLastVersionByBSForMySQL8 = "SELECT id, business_space, major_version ,minor_version ,patch_version ,extend_version " +
+		"FROM (" +
+		"SELECT ROW_NUMBER() OVER(" +
+		"PARTITION BY business_space " +
+		"ORDER BY major_version desc,minor_version desc,patch_version desc,extend_version desc" +
+		") row_no, id, business_space, major_version ,minor_version ,patch_version ,extend_version FROM brood_db_version_ctl" +
+		") a where a.row_no=1"
+	sqlGetVersionsOrderByVersions = "SELECT id, business_space, major_version ,minor_version ,patch_version ,extend_version " +
+		"FROM brood_db_version_ctl " +
+		"ORDER BY business_space DESC, major_version DESC,minor_version DESC,patch_version DESC,extend_version DESC"
 )
 
 // DbVersionCtlTask 数据库版本控制任务接口
@@ -93,12 +109,73 @@ type IncreaseVersionTask struct {
 func (ivt *IncreaseVersionTask) RunTask() error {
 
 	// 从数据库版本控制表读取各个业务空间的最新版本
+	versionCtls := make([]model.BroodDbVersionCtl, 0)
+	filters := make(map[string]SqlScriptFilter)
+
+	if strings.EqualFold("mysql8", ivt.props.DriverClassName) {
+		// mysql8支持`ROW_NUMBER() OVER()`函数，使用SQL直接获取每种业务空间的最新版本
+		ivt.dbClient.Raw(sqlGetLastVersionByBSForMySQL8).Scan(&versionCtls)
+		for _, versionCtl := range versionCtls {
+			filters[versionCtl.BusinessSpace] = SqlScriptFilter{
+				BusinessSpace: versionCtl.BusinessSpace,
+				MajorVersion:  versionCtl.MajorVersion,
+				MinorVersion:  versionCtl.MinorVersion,
+				PatchVersion:  versionCtl.PatchVersion,
+				ExtendVersion: versionCtl.ExtendVersion,
+			}
+		}
+	} else {
+		// 不支持`ROW_NUMBER() OVER()`函数，获取排序后的版本数据，每种业务空间取第一条数据
+		ivt.dbClient.Raw(sqlGetVersionsOrderByVersions).Scan(&versionCtls)
+		for _, versionCtl := range versionCtls {
+			bs := versionCtl.BusinessSpace
+			_, ok := filters[bs]
+			if !ok {
+				filters[bs] = SqlScriptFilter{
+					BusinessSpace: bs,
+					MajorVersion:  versionCtl.MajorVersion,
+					MinorVersion:  versionCtl.MinorVersion,
+					PatchVersion:  versionCtl.PatchVersion,
+					ExtendVersion: versionCtl.ExtendVersion,
+				}
+			}
+		}
+	}
 
 	// 生成数据库版本插入SQL语句
 
 	// 获取数据库版本升级SQL脚本目录集合
+	sqlScriptDirPaths := ivt.props.ScriptDirs
+	sqlDirPaths := strings.Split(sqlScriptDirPaths, ",")
+	if len(sqlDirPaths) == 0 {
+		return errors.New("数据库版本控制的属性sql脚本文件目录(script_dirs)未配置")
+	}
 
+	sqlScriptInfos := make([]*SqlScriptInfo, 0)
 	// 读取各个脚本目录下的SQL脚本，根据业务空间过滤出增量SQL脚本，获得增量脚本集合
+	for _, sqlDirPath := range sqlDirPaths {
+		sqlDirPath = strings.TrimSpace(sqlDirPath)
+		zclog.Debugf("读取SQL脚本目录: %s", sqlDirPath)
+		tmpArr := strings.Split(sqlDirPath, ":")
+		if len(tmpArr) != 2 {
+			return fmt.Errorf("数据库版本控制的属性sql脚本文件目录(script_dirs)配置的sql脚本目录格式不正确: %s", sqlDirPath)
+		}
+		var reader SqlScriptReader
+		switch tmpArr[0] {
+		case string(EMBEDFS):
+			reader = ivt.dbFS
+		case string(FILESYSTEM):
+			reader = &FSSqlReader{}
+		default:
+			return fmt.Errorf("不支持的SQL脚本资源模式: %s", tmpArr[0])
+		}
+
+		subScriptInfos, err := ReadSql(reader, tmpArr[1], filters)
+		if err != nil {
+			return err
+		}
+		sqlScriptInfos = append(sqlScriptInfos, subScriptInfos...)
+	}
 
 	// 对增量脚本集合按业务空间做分组，并排序
 

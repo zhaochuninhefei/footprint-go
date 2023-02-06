@@ -31,31 +31,25 @@ func DoDBVersionControl(existDB *gorm.DB, props *DbVersionCtlProps, dbFS *embed.
 	switch operationMode {
 	case DEPLOY_INIT:
 		// 创建数据库版本控制表
-		createVersionTblTask := &CreateVersionTblTask{
-			DbVersionCtlContext: DbVersionCtlContext{
-				dbClient: dbClient,
-				props:    ctlProps,
-				dbFS:     &resources.DBFiles,
-				lastTask: false,
-			},
-		}
-		tasks = append(tasks, createVersionTblTask)
+		tasks = append(tasks, makeCreateVersionTblTask())
 	case BASELINE_INIT:
+		// 创建数据库版本控制表
+		tasks = append(tasks, makeCreateVersionTblTask())
+		// 插入基线版本记录
+		tasks = append(tasks, makeInsertBaselineTask(dbFS))
 	case BASELINE_RESET:
+		// 删除数据库版本控制表
+		tasks = append(tasks, makeDropVersionTblTask(dbFS))
+		// 创建数据库版本控制表
+		tasks = append(tasks, makeCreateVersionTblTask())
+		// 插入基线版本记录
+		tasks = append(tasks, makeInsertBaselineTask(dbFS))
 	case DEPLOY_INCREASE:
 	default:
 		return fmt.Errorf("不支持的数据库版本控制操作模式: %d", operationMode)
 	}
 	// 执行增量SQL
-	increaseVersionTask := &IncreaseVersionTask{
-		DbVersionCtlContext: DbVersionCtlContext{
-			dbClient: dbClient,
-			props:    ctlProps,
-			dbFS:     dbFS,
-			lastTask: true,
-		},
-	}
-	tasks = append(tasks, increaseVersionTask)
+	tasks = append(tasks, makeIncreaseVersionTask(dbFS))
 
 	// 按顺序执行任务链
 	for _, task := range tasks {
@@ -66,6 +60,50 @@ func DoDBVersionControl(existDB *gorm.DB, props *DbVersionCtlProps, dbFS *embed.
 	}
 
 	return nil
+}
+
+func makeIncreaseVersionTask(dbFS *embed.FS) *IncreaseVersionTask {
+	return &IncreaseVersionTask{
+		DbVersionCtlContext: DbVersionCtlContext{
+			dbClient: dbClient,
+			props:    ctlProps,
+			dbFS:     dbFS,
+			lastTask: true,
+		},
+	}
+}
+
+func makeDropVersionTblTask(dbFS *embed.FS) *DropVersionTblTask {
+	return &DropVersionTblTask{
+		DbVersionCtlContext: DbVersionCtlContext{
+			dbClient: dbClient,
+			props:    ctlProps,
+			dbFS:     dbFS,
+			lastTask: false,
+		},
+	}
+}
+
+func makeInsertBaselineTask(dbFS *embed.FS) *InsertBaselineTask {
+	return &InsertBaselineTask{
+		DbVersionCtlContext: DbVersionCtlContext{
+			dbClient: dbClient,
+			props:    ctlProps,
+			dbFS:     dbFS,
+			lastTask: false,
+		},
+	}
+}
+
+func makeCreateVersionTblTask() *CreateVersionTblTask {
+	return &CreateVersionTblTask{
+		DbVersionCtlContext: DbVersionCtlContext{
+			dbClient: dbClient,
+			props:    ctlProps,
+			dbFS:     &resources.DBFiles,
+			lastTask: false,
+		},
+	}
 }
 
 // OperationMode 数据库版本控制操作模式

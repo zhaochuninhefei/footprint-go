@@ -8,8 +8,8 @@ import (
 	"strconv"
 )
 
-// EmbedSqlFileInfo 嵌入SQL文件信息
-type EmbedSqlFileInfo struct {
+// SqlScriptInfo SQL脚本信息
+type SqlScriptInfo struct {
 	// sql脚本文件名
 	//  格式为"[业务空间]_V[major].[minor].[patch].[extend]_[自定义名称].sql"
 	//  其中，`.[extend]`可以省略，如: "smtp_V1.0.0_init.sql"
@@ -71,14 +71,14 @@ func init() {
 	}
 }
 
-// ReadEmbedSqlByDirName 读取嵌入文件目录下的SQL文件(包括子目录)
+// ReadEmbedSql 读取嵌入文件目录下的SQL文件(包括子目录)
 //  @param embedFs 嵌入FS资源, 如根目录为`db`的嵌入FS
 //  @param dirPath 访问目录路径, 如:`db/footprint`
 //  @param filter SQL脚本过滤条件
-//  @return []*EmbedSqlFileInfo 嵌入SQL文件信息结构体数组(切片)
+//  @return []*SqlScriptInfo 嵌入SQL文件信息结构体数组(切片)
 //  @return error
-func ReadEmbedSqlByDirName(embedFs *embed.FS, dirPath string, filters map[string]SqlScriptFilter) ([]*EmbedSqlFileInfo, error) {
-	files := make([]*EmbedSqlFileInfo, 0)
+func ReadEmbedSql(embedFs *embed.FS, dirPath string, filters map[string]SqlScriptFilter) ([]*SqlScriptInfo, error) {
+	files := make([]*SqlScriptInfo, 0)
 
 	entries, err := embedFs.ReadDir(dirPath)
 	if err != nil {
@@ -90,7 +90,7 @@ func ReadEmbedSqlByDirName(embedFs *embed.FS, dirPath string, filters map[string
 		path := filepath.Join(dirPath, name)
 		isDir := entry.IsDir()
 		if isDir {
-			subFiles, err := ReadEmbedSqlByDirName(embedFs, path, filters)
+			subFiles, err := ReadEmbedSql(embedFs, path, filters)
 			if err != nil {
 				return nil, err
 			}
@@ -127,8 +127,8 @@ func ReadEmbedSqlByDirName(embedFs *embed.FS, dirPath string, filters map[string
 // createFileInfo 根据SQL文件名填充细节
 //  @param fileInfo 嵌入SQL文件信息结构体
 //  @return error
-func createFileInfo(name string, path string) (EmbedSqlFileInfo, error) {
-	fileInfo := EmbedSqlFileInfo{
+func createFileInfo(name string, path string) (SqlScriptInfo, error) {
+	fileInfo := SqlScriptInfo{
 		Name: name,
 		Path: path,
 	}
@@ -194,7 +194,7 @@ func createFileInfo(name string, path string) (EmbedSqlFileInfo, error) {
 	return fileInfo, fmt.Errorf("sqlFileName未能正确匹配正则表达式: %s", fileInfo.Name)
 }
 
-func filterIncreaseFileInfoByVersions(fileInfo EmbedSqlFileInfo, filter SqlScriptFilter) bool {
+func filterIncreaseFileInfoByVersions(fileInfo SqlScriptInfo, filter SqlScriptFilter) bool {
 	if fileInfo.MajorVersion == filter.MajorVersion {
 		if fileInfo.MinorVersion == filter.MinorVersion {
 			if fileInfo.PatchVersion == filter.PatchVersion {

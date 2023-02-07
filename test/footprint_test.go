@@ -254,8 +254,8 @@ func Test06_deploy_increase(t *testing.T) {
 	}
 
 	myProps := &versionctl.DbVersionCtlProps{
-		ScriptResourceMode:               versionctl.EMBEDFS,
-		ScriptDirs:                       "embedfs:db/test01,embedfs:db/test02,embedfs:db/test03,embedfs:db/test04,embedfs:db/test05,embedfs:db/test06",
+		ScriptResourceMode:               versionctl.FILESYSTEM,
+		ScriptDirs:                       "embedfs:db/test01,embedfs:db/test02,embedfs:db/test03,embedfs:db/test04,embedfs:db/test05,filesystem:resources/db/test06",
 		BaselineBusinessSpaceAndVersions: "template_V3.11.999,smtp_V3.0.999",
 		DbVersionTableName:               versionctl.DefaultDbVersionTableName,
 		DbVersionTableCreateSqlPath:      versionctl.DefaultDbVersionTableCreateSqlPath,

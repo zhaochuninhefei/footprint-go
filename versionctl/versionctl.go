@@ -16,12 +16,12 @@ var ctlProps *DbVersionCtlProps
 // db 目标数据库客户端
 var dbClient *gorm.DB
 
-func DoDBVersionControl(existDB *gorm.DB, props *DbVersionCtlProps, dbFS *embed.FS) error {
+func DoDBVersionControl(existDB *gorm.DB, existProps *DbVersionCtlProps, dbFS *embed.FS) error {
 	zclog.Info("执行数据库版本控制操作(DoDBVersionControl) 开始...")
 
-	ctlProps = FillDefaultFields(props)
+	ctlProps = FillDefaultFields(existProps)
 	var err error
-	dbClient, err = mysql.ConnectMysqlByDefault(existDB, props.Host, props.Port, props.Username, props.Password, props.Database)
+	dbClient, err = mysql.ConnectMysqlByDefault(existDB, ctlProps.Host, ctlProps.Port, ctlProps.Username, ctlProps.Password, ctlProps.Database)
 	if err != nil {
 		return err
 	}

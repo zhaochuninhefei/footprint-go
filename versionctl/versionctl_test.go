@@ -5,10 +5,50 @@ import (
 	"fmt"
 	"gitee.com/zhaochuninhefei/footprint-go/db/mysql"
 	"gitee.com/zhaochuninhefei/footprint-go/test/resources"
+	"gitee.com/zhaochuninhefei/footprint-go/utils"
 	"gitee.com/zhaochuninhefei/zcgolog/zclog"
+	"gorm.io/gorm"
 	"strings"
 	"testing"
 )
+
+func TestDoDBVersionControl(t *testing.T) {
+	err := clearDB()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	myDb, err := mysql.ConnectMysqlByDefault(nil, "localhost", "3307", "zhaochun1", "zhaochun@GITHUB", "db_footprint_test")
+	if err != nil {
+		t.Fatal(err)
+	}
+	tables := make([]string, 0)
+	result := myDb.Raw("show tables").Scan(&tables)
+	if err = result.Error; err != nil {
+		t.Fatal(err)
+	}
+	fmt.Println(tables)
+
+	//myProps := &DbVersionCtlProps{
+	//	ScriptResourceMode:               EMBEDFS,
+	//	ScriptDirs:                       "",
+	//	BaselineBusinessSpaceAndVersions: "",
+	//	DbVersionTableName:               defaultDbVersionTableName,
+	//	DbVersionTableCreateSqlPath:      defaultDbVersionTableCreateSqlPath,
+	//	DriverClassName:                  "",
+	//	Host:                             "",
+	//	Port:                             "",
+	//	Database:                         "",
+	//	Username:                         "",
+	//	Password:                         "",
+	//	ExistTblQuerySql:                 defaultExistTblQuerySql,
+	//	BaselineReset:                    "",
+	//	BaselineResetConditionSql:        "",
+	//	ModifyDbVersionTable:             "",
+	//	ModifyDbVersionTableSqlPath:      "",
+	//}
+
+}
 
 func TestReadSql(t *testing.T) {
 	fmt.Println()
@@ -220,4 +260,26 @@ func prepareCtlProps() *DbVersionCtlProps {
 		ModifyDbVersionTableSqlPath:      "",
 	}
 	return props
+}
+
+func clearDB() error {
+	clearSqlBytes, err := resources.DBFilesTest.ReadFile("db/beforeclass/clear_footprinttest.sql")
+	if err != nil {
+		return err
+	}
+	myDb, err := mysql.ConnectMysqlByDefault(nil, "localhost", "3307", "zhaochun1", "zhaochun@GITHUB", "db_footprint_test")
+	if err != nil {
+		return err
+	}
+	err = myDb.Transaction(func(tx *gorm.DB) error {
+		err = utils.RunSqlScript(tx, string(clearSqlBytes))
+		if err != nil {
+			return err
+		}
+		return nil
+	})
+	if err != nil {
+		return err
+	}
+	return nil
 }

@@ -6,7 +6,9 @@ footprint-go
 # 对应的footprint地址
 footprint是java版本的数据库版本管控工具，参考:
 
-<a href="https://github.com/zhaochuninhefei/footprint" target="_blank">footprint</a>
+<a href="https://gitee.com/zhaochuninhefei/footprint" target="_blank">footprint in gitee</a>
+
+<a href="https://github.com/zhaochuninhefei/footprint" target="_blank">footprint in github</a>
 
 
 # JetBrains support

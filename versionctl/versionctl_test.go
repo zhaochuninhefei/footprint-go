@@ -12,8 +12,12 @@ import (
 	"testing"
 )
 
-func TestDoDBVersionControl(t *testing.T) {
+func TestDoDBVersionControl_deploy_init(t *testing.T) {
 	err := clearDB()
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = showTables()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -22,12 +26,6 @@ func TestDoDBVersionControl(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	tables := make([]string, 0)
-	result := myDb.Raw("show tables").Scan(&tables)
-	if err = result.Error; err != nil {
-		t.Fatal(err)
-	}
-	fmt.Printf("show tables: %s\n", tables)
 
 	myProps := &DbVersionCtlProps{
 		ScriptResourceMode:               EMBEDFS,
@@ -52,6 +50,24 @@ func TestDoDBVersionControl(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+}
+
+func showTables() error {
+	myDb, err := mysql.ConnectMysqlByDefault(nil, "localhost", "3307", "zhaochun1", "zhaochun@GITHUB", "db_footprint_test")
+	if err != nil {
+		return err
+	}
+	tables := make([]string, 0)
+	result := myDb.Raw("show tables").Scan(&tables)
+	if err = result.Error; err != nil {
+		return err
+	}
+	fmt.Printf("show tables: %s\n", tables)
+	return nil
+}
+
+func TestDoDBVersionControl_deploy_increase(t *testing.T) {
+
 }
 
 func TestReadSql(t *testing.T) {

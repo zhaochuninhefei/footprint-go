@@ -52,20 +52,6 @@ func TestDoDBVersionControl_deploy_init(t *testing.T) {
 	}
 }
 
-func showTables() error {
-	myDb, err := mysql.ConnectMysqlByDefault(nil, "localhost", "3307", "zhaochun1", "zhaochun@GITHUB", "db_footprint_test")
-	if err != nil {
-		return err
-	}
-	tables := make([]string, 0)
-	result := myDb.Raw("show tables").Scan(&tables)
-	if err = result.Error; err != nil {
-		return err
-	}
-	fmt.Printf("show tables: %s\n", tables)
-	return nil
-}
-
 func TestDoDBVersionControl_deploy_increase(t *testing.T) {
 
 }
@@ -301,5 +287,19 @@ func clearDB() error {
 	if err != nil {
 		return err
 	}
+	return nil
+}
+
+func showTables() error {
+	myDb, err := mysql.ConnectMysqlByDefault(nil, "localhost", "3307", "zhaochun1", "zhaochun@GITHUB", "db_footprint_test")
+	if err != nil {
+		return err
+	}
+	tables := make([]string, 0)
+	result := myDb.Raw("show tables").Scan(&tables)
+	if err = result.Error; err != nil {
+		return err
+	}
+	fmt.Printf("show tables: %s\n", tables)
 	return nil
 }

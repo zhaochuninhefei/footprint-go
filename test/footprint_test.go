@@ -10,6 +10,14 @@ import (
 	"testing"
 )
 
+const (
+	dbHost = "localhost"
+	dbPort = "3307"
+	dbUser = "zhaochun1"
+	dbPwd  = "zhaochun@GITHUB"
+	dbName = "db_footprint_test"
+)
+
 func Test01_deploy_init(t *testing.T) {
 	err := clearDB()
 	if err != nil {
@@ -23,7 +31,7 @@ func Test01_deploy_init(t *testing.T) {
 		t.Fatal("未能成功清理测试数据库")
 	}
 
-	myDb, err := mysql.ConnectMysqlByDefault(nil, "localhost", "3307", "zhaochun1", "zhaochun@GITHUB", "db_footprint_test")
+	myDb, err := mysql.ConnectMysqlByDefault(nil, dbHost, dbPort, dbUser, dbPwd, dbName)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -34,12 +42,12 @@ func Test01_deploy_init(t *testing.T) {
 		BaselineBusinessSpaceAndVersions: "template_V2.11.0,smtp_V2.0.0",
 		DbVersionTableName:               versionctl.DefaultDbVersionTableName,
 		DbVersionTableCreateSqlPath:      versionctl.DefaultDbVersionTableCreateSqlPath,
-		DriverClassName:                  "mysql8",
-		Host:                             "localhost",
-		Port:                             "3307",
-		Database:                         "db_footprint_test",
-		Username:                         "zhaochun1",
-		Password:                         "zhaochun@GITHUB",
+		DriverClassName:                  "mysql",
+		Host:                             dbHost,
+		Port:                             dbPort,
+		Database:                         dbName,
+		Username:                         dbUser,
+		Password:                         dbPwd,
 		ExistTblQuerySql:                 versionctl.DefaultExistTblQuerySql,
 		BaselineReset:                    "",
 		BaselineResetConditionSql:        "",
@@ -78,12 +86,12 @@ func Test02_deploy_increase(t *testing.T) {
 		BaselineBusinessSpaceAndVersions: "template_V2.11.0,smtp_V2.0.0",
 		DbVersionTableName:               versionctl.DefaultDbVersionTableName,
 		DbVersionTableCreateSqlPath:      versionctl.DefaultDbVersionTableCreateSqlPath,
-		DriverClassName:                  "mysql8",
-		Host:                             "localhost",
-		Port:                             "3307",
-		Database:                         "db_footprint_test",
-		Username:                         "zhaochun1",
-		Password:                         "zhaochun@GITHUB",
+		DriverClassName:                  "mysql",
+		Host:                             dbHost,
+		Port:                             dbPort,
+		Database:                         dbName,
+		Username:                         dbUser,
+		Password:                         dbPwd,
 		ExistTblQuerySql:                 versionctl.DefaultExistTblQuerySql,
 		BaselineReset:                    "",
 		BaselineResetConditionSql:        "",
@@ -128,11 +136,11 @@ func Test03_baseline_init(t *testing.T) {
 		DbVersionTableName:               versionctl.DefaultDbVersionTableName,
 		DbVersionTableCreateSqlPath:      versionctl.DefaultDbVersionTableCreateSqlPath,
 		DriverClassName:                  "mysql",
-		Host:                             "localhost",
-		Port:                             "3307",
-		Database:                         "db_footprint_test",
-		Username:                         "zhaochun1",
-		Password:                         "zhaochun@GITHUB",
+		Host:                             dbHost,
+		Port:                             dbPort,
+		Database:                         dbName,
+		Username:                         dbUser,
+		Password:                         dbPwd,
 		ExistTblQuerySql:                 versionctl.DefaultExistTblQuerySql,
 		BaselineReset:                    "",
 		BaselineResetConditionSql:        "",
@@ -172,11 +180,11 @@ func Test04_deploy_increase(t *testing.T) {
 		DbVersionTableName:               versionctl.DefaultDbVersionTableName,
 		DbVersionTableCreateSqlPath:      versionctl.DefaultDbVersionTableCreateSqlPath,
 		DriverClassName:                  "mysql",
-		Host:                             "localhost",
-		Port:                             "3307",
-		Database:                         "db_footprint_test",
-		Username:                         "zhaochun1",
-		Password:                         "zhaochun@GITHUB",
+		Host:                             dbHost,
+		Port:                             dbPort,
+		Database:                         dbName,
+		Username:                         dbUser,
+		Password:                         dbPwd,
 		ExistTblQuerySql:                 versionctl.DefaultExistTblQuerySql,
 		BaselineReset:                    "",
 		BaselineResetConditionSql:        "",
@@ -190,6 +198,7 @@ func Test04_deploy_increase(t *testing.T) {
 	}
 }
 
+//goland:noinspection SqlDialectInspection,SqlNoDataSourceInspection
 func Test05_baseline_reset(t *testing.T) {
 	tbls, err := showTables()
 	if err != nil {
@@ -215,12 +224,12 @@ func Test05_baseline_reset(t *testing.T) {
 		BaselineBusinessSpaceAndVersions: "template_V3.11.999,smtp_V3.0.999",
 		DbVersionTableName:               versionctl.DefaultDbVersionTableName,
 		DbVersionTableCreateSqlPath:      versionctl.DefaultDbVersionTableCreateSqlPath,
-		DriverClassName:                  "mysql8",
-		Host:                             "localhost",
-		Port:                             "3307",
-		Database:                         "db_footprint_test",
-		Username:                         "zhaochun1",
-		Password:                         "zhaochun@GITHUB",
+		DriverClassName:                  "mysql",
+		Host:                             dbHost,
+		Port:                             dbPort,
+		Database:                         dbName,
+		Username:                         dbUser,
+		Password:                         dbPwd,
 		ExistTblQuerySql:                 versionctl.DefaultExistTblQuerySql,
 		BaselineReset:                    "y",
 		BaselineResetConditionSql:        "SELECT 1 FROM brood_db_version_ctl WHERE version = 'template_V3.10.11'",
@@ -234,6 +243,7 @@ func Test05_baseline_reset(t *testing.T) {
 	}
 }
 
+//goland:noinspection SqlDialectInspection,SqlNoDataSourceInspection
 func Test06_deploy_increase(t *testing.T) {
 	tbls, err := showTables()
 	if err != nil {
@@ -260,11 +270,11 @@ func Test06_deploy_increase(t *testing.T) {
 		DbVersionTableName:               versionctl.DefaultDbVersionTableName,
 		DbVersionTableCreateSqlPath:      versionctl.DefaultDbVersionTableCreateSqlPath,
 		DriverClassName:                  "mysql",
-		Host:                             "localhost",
-		Port:                             "3307",
-		Database:                         "db_footprint_test",
-		Username:                         "zhaochun1",
-		Password:                         "zhaochun@GITHUB",
+		Host:                             dbHost,
+		Port:                             dbPort,
+		Database:                         dbName,
+		Username:                         dbUser,
+		Password:                         dbPwd,
 		ExistTblQuerySql:                 versionctl.DefaultExistTblQuerySql,
 		BaselineReset:                    "y",
 		BaselineResetConditionSql:        "SELECT 1 FROM brood_db_version_ctl WHERE version = 'template_V3.10.11'",
@@ -283,7 +293,7 @@ func clearDB() error {
 	if err != nil {
 		return err
 	}
-	myDb, err := mysql.ConnectMysqlByDefault(nil, "localhost", "3307", "zhaochun1", "zhaochun@GITHUB", "db_footprint_test")
+	myDb, err := mysql.ConnectMysqlByDefault(nil, dbHost, dbPort, dbUser, dbPwd, dbName)
 	if err != nil {
 		return err
 	}
@@ -301,7 +311,7 @@ func clearDB() error {
 }
 
 func showTables() ([]string, error) {
-	myDb, err := mysql.ConnectMysqlByDefault(nil, "localhost", "3307", "zhaochun1", "zhaochun@GITHUB", "db_footprint_test")
+	myDb, err := mysql.ConnectMysqlByDefault(nil, dbHost, dbPort, dbUser, dbPwd, dbName)
 	if err != nil {
 		return nil, err
 	}
@@ -314,8 +324,9 @@ func showTables() ([]string, error) {
 	return tables, nil
 }
 
+//goland:noinspection SqlDialectInspection,SqlNoDataSourceInspection
 func dropCtlTbl(tblName string) error {
-	myDb, err := mysql.ConnectMysqlByDefault(nil, "localhost", "3307", "zhaochun1", "zhaochun@GITHUB", "db_footprint_test")
+	myDb, err := mysql.ConnectMysqlByDefault(nil, dbHost, dbPort, dbUser, dbPwd, dbName)
 	if err != nil {
 		return err
 	}

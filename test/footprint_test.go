@@ -39,7 +39,7 @@ func Test01_deploy_init(t *testing.T) {
 	myProps := &versionctl.DbVersionCtlProps{
 		ScriptResourceMode:               versionctl.EMBEDFS,
 		ScriptDirs:                       "embedfs:db/test01",
-		BaselineBusinessSpaceAndVersions: "template_V2.11.0,smtp_V2.0.0",
+		BaselineBusinessSpaceAndVersions: "",
 		DbVersionTableName:               versionctl.DefaultDbVersionTableName,
 		DbVersionTableCreateSqlPath:      versionctl.DefaultDbVersionTableCreateSqlPath,
 		DriverClassName:                  "mysql",
@@ -83,7 +83,7 @@ func Test02_deploy_increase(t *testing.T) {
 	myProps := &versionctl.DbVersionCtlProps{
 		ScriptResourceMode:               versionctl.EMBEDFS,
 		ScriptDirs:                       "embedfs:db/test01,embedfs:db/test02",
-		BaselineBusinessSpaceAndVersions: "template_V2.11.0,smtp_V2.0.0",
+		BaselineBusinessSpaceAndVersions: "",
 		DbVersionTableName:               versionctl.DefaultDbVersionTableName,
 		DbVersionTableCreateSqlPath:      versionctl.DefaultDbVersionTableCreateSqlPath,
 		DriverClassName:                  "mysql",

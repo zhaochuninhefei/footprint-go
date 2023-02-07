@@ -60,11 +60,14 @@ type DbVersionCtlProps struct {
 	ExistTblQuerySql string `json:"exist_tbl_query_sql" yaml:"exist_tbl_query_sql" mapstructure:"exist_tbl_query_sql"`
 
 	// BaselineReset 是否重置数据库基线版本(y/n)
+	//  注意，只有需要重置数据库版本控制的基线版本时，才需要设置该属性，重置操作会删除当前版本控制表，是一个比较危险的操作。
+	//  因此在设置BaselineReset为`y`的同时，还要设置BaselineResetConditionSql以检查版本控制表，确保不会被错误地再次重置。
 	BaselineReset string `json:"baseline_reset" yaml:"baseline_reset" mapstructure:"baseline_reset"`
 
-	// BaselineResetConditionSql 数据库基线版本重置条件SQL，只有[baselineReset]设置为"y"，且该SQL查询结果非空，才会进行数据库基线版本重置操作
-	// 通常建议使用时间戳字段[install_time]作为查询SQL的条件，这样只会生效一次，
-	// 以后升级版本时，即使忘记将【baselineReset】属性清除或设置为"n"也不会导致数据库基线版本被误重置。
+	// BaselineResetConditionSql 数据库基线版本重置条件SQL，只有[baselineReset]设置为"y"，且该SQL查询结果非空，才会进行数据库基线版本重置操作。
+	//  通常建议使用时间戳字段[install_time]作为查询SQL的条件，如`SELECT 1 FROM brood_db_version_ctl where install_time = '2023-02-07 10:20:28'`，
+	//  因为数据库基线版本重置操作会删除数据库版本控制表，于是该条件SQL只会生效一次，
+	//  以后升级版本时，即使忘记将【baselineReset】属性清除或设置为"n"也不会导致数据库基线版本被错误地再次重置。
 	BaselineResetConditionSql string `json:"baseline_reset_condition_sql" yaml:"baseline_reset_condition_sql" mapstructure:"baseline_reset_condition_sql"`
 
 	// ModifyDbVersionTable 是否修改DbVersionTable结构(y/n)

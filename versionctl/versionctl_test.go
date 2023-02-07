@@ -53,7 +53,34 @@ func TestDoDBVersionControl_deploy_init(t *testing.T) {
 }
 
 func TestDoDBVersionControl_deploy_increase(t *testing.T) {
+	err := showTables()
+	if err != nil {
+		t.Fatal(err)
+	}
 
+	myProps := &DbVersionCtlProps{
+		ScriptResourceMode:               EMBEDFS,
+		ScriptDirs:                       "embedfs:db/test01,embedfs:db/test02",
+		BaselineBusinessSpaceAndVersions: "template_V2.11.0,smtp_V2.0.0",
+		DbVersionTableName:               defaultDbVersionTableName,
+		DbVersionTableCreateSqlPath:      defaultDbVersionTableCreateSqlPath,
+		DriverClassName:                  "mysql8",
+		Host:                             "localhost",
+		Port:                             "3307",
+		Database:                         "db_footprint_test",
+		Username:                         "zhaochun1",
+		Password:                         "zhaochun@GITHUB",
+		ExistTblQuerySql:                 defaultExistTblQuerySql,
+		BaselineReset:                    "",
+		BaselineResetConditionSql:        "",
+		ModifyDbVersionTable:             "",
+		ModifyDbVersionTableSqlPath:      "",
+	}
+
+	err = DoDBVersionControl(nil, myProps, &resources.DBFilesTest)
+	if err != nil {
+		t.Fatal(err)
+	}
 }
 
 func TestReadSql(t *testing.T) {
@@ -234,12 +261,11 @@ func TestQueryExistTblNames(t *testing.T) {
 func TestCheckBaselineResetConditionSql(t *testing.T) {
 	ctlProps = FillDefaultFields(prepareCtlProps())
 	//goland:noinspection SqlResolve
-	ctlProps.BaselineResetConditionSql = "select * from brood_db_version_ctl"
+	ctlProps.BaselineResetConditionSql = "select 1 from brood_db_version_ctl"
 	var err error
 	dbClient, err = mysql.ConnectMysqlByDefault(nil, "localhost", "3307", "zhaochun1", "zhaochun@GITHUB", "db_footprint_test")
 	if err != nil {
-		zclog.Errorln(err)
-		return
+		t.Fatal(err)
 	}
 
 	result := checkBaselineResetConditionSql()
@@ -296,7 +322,7 @@ func showTables() error {
 		return err
 	}
 	tables := make([]string, 0)
-	result := myDb.Raw("show tables").Scan(&tables)
+	result := myDb.Raw(defaultExistTblQuerySql).Scan(&tables)
 	if err = result.Error; err != nil {
 		return err
 	}

@@ -89,9 +89,9 @@ func (cvtt *CreateVersionTblTask) RunTask() error {
 	}
 	// 判断是否需要替换数据库版本控制表的表名
 	sqlCreate := string(sqlBytes)
-	if strings.EqualFold(dbVersionTableCreateSqlPath, defaultDbVersionTableCreateSqlPath) &&
-		!strings.EqualFold(defaultDbVersionTableName, cvtt.props.DbVersionTableName) {
-		sqlCreate = strings.ReplaceAll(sqlCreate, defaultDbVersionTableName, cvtt.props.DbVersionTableName)
+	if strings.EqualFold(dbVersionTableCreateSqlPath, DefaultDbVersionTableCreateSqlPath) &&
+		!strings.EqualFold(DefaultDbVersionTableName, cvtt.props.DbVersionTableName) {
+		sqlCreate = strings.ReplaceAll(sqlCreate, DefaultDbVersionTableName, cvtt.props.DbVersionTableName)
 	}
 	// 执行建表SQL
 	err = utils.RunSqlScript(cvtt.dbClient, sqlCreate)
@@ -144,7 +144,7 @@ func (ivt *IncreaseVersionTask) RunTask() error {
 		// mysql8支持`ROW_NUMBER() OVER()`函数，使用SQL直接获取每种业务空间的最新版本
 		ivt.dbClient.
 			Raw(strings.ReplaceAll(sqlGetLastVersionByBSForMySQL8,
-				defaultDbVersionTableName, ivt.props.DbVersionTableName)).
+				DefaultDbVersionTableName, ivt.props.DbVersionTableName)).
 			Scan(&versionCtls)
 		for _, versionCtl := range versionCtls {
 			filters[versionCtl.BusinessSpace] = SqlScriptFilter{
@@ -159,7 +159,7 @@ func (ivt *IncreaseVersionTask) RunTask() error {
 		// 不支持`ROW_NUMBER() OVER()`函数，获取排序后的版本数据，每种业务空间取第一条数据
 		ivt.dbClient.
 			Raw(strings.ReplaceAll(sqlGetVersionsOrderByVersions,
-				defaultDbVersionTableName, ivt.props.DbVersionTableName)).
+				DefaultDbVersionTableName, ivt.props.DbVersionTableName)).
 			Scan(&versionCtls)
 		for _, versionCtl := range versionCtls {
 			bs := versionCtl.BusinessSpace
@@ -240,8 +240,8 @@ func (ivt *IncreaseVersionTask) RunTask() error {
 	}
 
 	// 生成数据库版本插入与更新SQL语句
-	insertSql := strings.ReplaceAll(sqlInsertVersionCtl, defaultDbVersionTableName, ivt.props.DbVersionTableName)
-	updateSql := strings.ReplaceAll(sqlUpdateVersionCtl, defaultDbVersionTableName, ivt.props.DbVersionTableName)
+	insertSql := strings.ReplaceAll(sqlInsertVersionCtl, DefaultDbVersionTableName, ivt.props.DbVersionTableName)
+	updateSql := strings.ReplaceAll(sqlUpdateVersionCtl, DefaultDbVersionTableName, ivt.props.DbVersionTableName)
 
 	// 遍历增量SQL脚本，读取SQL脚本，插入数据库版本控制数据，执行SQL脚本，更新版本记录
 	for bs, subInfos := range group {
@@ -322,7 +322,7 @@ func (ibt *InsertBaselineTask) RunTask() error {
 	zclog.Info("InsertBaselineTask begin...")
 
 	// 生成数据库版本插入SQL语句
-	insertSql := strings.ReplaceAll(sqlInsertVersionCtl, defaultDbVersionTableName, ibt.props.DbVersionTableName)
+	insertSql := strings.ReplaceAll(sqlInsertVersionCtl, DefaultDbVersionTableName, ibt.props.DbVersionTableName)
 
 	// 获取基线版本信息
 	baselineArr := strings.Split(strings.TrimSpace(ibt.props.BaselineBusinessSpaceAndVersions), ",")

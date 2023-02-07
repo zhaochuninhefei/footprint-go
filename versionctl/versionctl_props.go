@@ -11,9 +11,9 @@ const (
 	EMBEDFS    ScriptResourceMode = "embedfs"
 	FILESYSTEM ScriptResourceMode = "filesystem"
 
-	defaultDbVersionTableName          = "brood_db_version_ctl"
-	defaultDbVersionTableCreateSqlPath = "embedfs:db/versionctl/create_brood_db_version_ctl.sql"
-	defaultExistTblQuerySql            = "show tables"
+	DefaultDbVersionTableName          = "brood_db_version_ctl"
+	DefaultDbVersionTableCreateSqlPath = "embedfs:db/versionctl/create_brood_db_version_ctl.sql"
+	DefaultExistTblQuerySql            = "show tables"
 )
 
 type DbVersionCtlProps struct {
@@ -83,15 +83,15 @@ func FillDefaultFields(ctlProps *DbVersionCtlProps) *DbVersionCtlProps {
 			ScriptResourceMode:               EMBEDFS,
 			ScriptDirs:                       "",
 			BaselineBusinessSpaceAndVersions: "",
-			DbVersionTableName:               defaultDbVersionTableName,
-			DbVersionTableCreateSqlPath:      defaultDbVersionTableCreateSqlPath,
+			DbVersionTableName:               DefaultDbVersionTableName,
+			DbVersionTableCreateSqlPath:      DefaultDbVersionTableCreateSqlPath,
 			DriverClassName:                  "",
 			Host:                             "",
 			Port:                             "",
 			Database:                         "",
 			Username:                         "",
 			Password:                         "",
-			ExistTblQuerySql:                 defaultExistTblQuerySql,
+			ExistTblQuerySql:                 DefaultExistTblQuerySql,
 			BaselineReset:                    "",
 			BaselineResetConditionSql:        "",
 			ModifyDbVersionTable:             "",
@@ -103,13 +103,13 @@ func FillDefaultFields(ctlProps *DbVersionCtlProps) *DbVersionCtlProps {
 		ctlProps.ScriptResourceMode = EMBEDFS
 	}
 	if ctlProps.DbVersionTableName == "" {
-		ctlProps.DbVersionTableName = defaultDbVersionTableName
+		ctlProps.DbVersionTableName = DefaultDbVersionTableName
 	}
 	if ctlProps.DbVersionTableCreateSqlPath == "" {
-		ctlProps.DbVersionTableCreateSqlPath = defaultDbVersionTableCreateSqlPath
+		ctlProps.DbVersionTableCreateSqlPath = DefaultDbVersionTableCreateSqlPath
 	}
 	if ctlProps.ExistTblQuerySql == "" {
-		ctlProps.ExistTblQuerySql = defaultExistTblQuerySql
+		ctlProps.ExistTblQuerySql = DefaultExistTblQuerySql
 	}
 	return ctlProps
 }

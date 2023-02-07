@@ -270,7 +270,8 @@ Test03_baseline_init的典型配置如下:
 ```
 在`BASELINE_INIT`场景下，项目已经上线了，数据库已经有业务表了，但是还没有数据库版本控制表，所以此时开始使用`footprint-go`就需要添加`BaselineBusinessSpaceAndVersions`配置。
 
-这个配置是给出一个基线版本，小于或等于这些版本的SQL脚本将不会被执行，它们是已经上线的项目之前已经导入的表和数据。只有版本大于基线版本的SQL才会被执行。
+这个配置是给出一个基线版本，小于或等于这些版本的SQL脚本将不会被执行，它们对应的是已经上线的表和数据。如果本次升级有数据库更新，那么对应的SQL脚本的版本必须大于基线版本才会被执行。
+> 你当然也可以不再写那些已经上线的表与数据的SQL，但如果你的应用有部署到其他环境的可能的话，那么还是建议你准备一下，这样再次部署的时候就很简单了，建好空的database后直接启动应用，`footprint-go`会自动为你建表并生成对应的初期数据。
 
 Test04_deploy_increase的配置与Test03_baseline_init基本相同，无需再述。
 > 在Test03_baseline_init的`BASELINE_INIT`操作之后，数据库版本控制表被创建，`BaselineBusinessSpaceAndVersions`指定的基线版本与可能存在的版本更新的SQL脚本被执行，其版本记录也被写入数据库版本控制表，

@@ -17,9 +17,12 @@ func TestDoDBVersionControl_deploy_init(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	err = showTables()
+	tbls, err := showTables()
 	if err != nil {
 		t.Fatal(err)
+	}
+	if len(tbls) > 0 {
+		t.Fatal("未能成功清理测试数据库")
 	}
 
 	myDb, err := mysql.ConnectMysqlByDefault(nil, "localhost", "3307", "zhaochun1", "zhaochun@GITHUB", "db_footprint_test")
@@ -53,14 +56,76 @@ func TestDoDBVersionControl_deploy_init(t *testing.T) {
 }
 
 func TestDoDBVersionControl_deploy_increase(t *testing.T) {
-	err := showTables()
+	tbls, err := showTables()
 	if err != nil {
 		t.Fatal(err)
+	}
+	if len(tbls) < 2 {
+		t.Fatal("测试数据不正确，即存表未导入，请确认是否先执行了TestDoDBVersionControl_deploy_init")
+	}
+	hasCtlTbl := false
+	for _, tbl := range tbls {
+		if tbl == defaultDbVersionTableName {
+			hasCtlTbl = true
+			break
+		}
+	}
+	if !hasCtlTbl {
+		t.Fatal("测试数据不正确，没有导入版本控制表，请确认是否先执行了TestDoDBVersionControl_deploy_init")
 	}
 
 	myProps := &DbVersionCtlProps{
 		ScriptResourceMode:               EMBEDFS,
 		ScriptDirs:                       "embedfs:db/test01,embedfs:db/test02",
+		BaselineBusinessSpaceAndVersions: "template_V2.11.0,smtp_V2.0.0",
+		DbVersionTableName:               defaultDbVersionTableName,
+		DbVersionTableCreateSqlPath:      defaultDbVersionTableCreateSqlPath,
+		DriverClassName:                  "mysql8",
+		Host:                             "localhost",
+		Port:                             "3307",
+		Database:                         "db_footprint_test",
+		Username:                         "zhaochun1",
+		Password:                         "zhaochun@GITHUB",
+		ExistTblQuerySql:                 defaultExistTblQuerySql,
+		BaselineReset:                    "",
+		BaselineResetConditionSql:        "",
+		ModifyDbVersionTable:             "",
+		ModifyDbVersionTableSqlPath:      "",
+	}
+
+	err = DoDBVersionControl(nil, myProps, &resources.DBFilesTest)
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestDoDBVersionControl_baseline_init(t *testing.T) {
+	// 删除数据库版本表
+	err := dropCtlTbl(defaultDbVersionTableName)
+	if err != nil {
+		t.Fatal(err)
+	}
+	tbls, err := showTables()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(tbls) < 1 {
+		t.Fatal("测试数据不正确，需要导入即存表，请确实是否先执行了TestDoDBVersionControl_deploy_init与TestDoDBVersionControl_deploy_increase")
+	}
+	hasCtlTbl := false
+	for _, tbl := range tbls {
+		if tbl == defaultDbVersionTableName {
+			hasCtlTbl = true
+			break
+		}
+	}
+	if hasCtlTbl {
+		t.Fatal("测试数据不正确，版本控制表未删除")
+	}
+
+	myProps := &DbVersionCtlProps{
+		ScriptResourceMode:               EMBEDFS,
+		ScriptDirs:                       "embedfs:db/test01,embedfs:db/test02,embedfs:db/test03",
 		BaselineBusinessSpaceAndVersions: "template_V2.11.0,smtp_V2.0.0",
 		DbVersionTableName:               defaultDbVersionTableName,
 		DbVersionTableCreateSqlPath:      defaultDbVersionTableCreateSqlPath,
@@ -316,16 +381,28 @@ func clearDB() error {
 	return nil
 }
 
-func showTables() error {
+func showTables() ([]string, error) {
 	myDb, err := mysql.ConnectMysqlByDefault(nil, "localhost", "3307", "zhaochun1", "zhaochun@GITHUB", "db_footprint_test")
 	if err != nil {
-		return err
+		return nil, err
 	}
 	tables := make([]string, 0)
 	result := myDb.Raw(defaultExistTblQuerySql).Scan(&tables)
 	if err = result.Error; err != nil {
-		return err
+		return nil, err
 	}
 	fmt.Printf("show tables: %s\n", tables)
+	return tables, nil
+}
+
+func dropCtlTbl(tblName string) error {
+	myDb, err := mysql.ConnectMysqlByDefault(nil, "localhost", "3307", "zhaochun1", "zhaochun@GITHUB", "db_footprint_test")
+	if err != nil {
+		return err
+	}
+	result := myDb.Exec("DROP TABLE IF EXISTS " + tblName)
+	if err = result.Error; err != nil {
+		return err
+	}
 	return nil
 }

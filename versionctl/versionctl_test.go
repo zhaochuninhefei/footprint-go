@@ -27,7 +27,7 @@ func TestDoDBVersionControl(t *testing.T) {
 	if err = result.Error; err != nil {
 		t.Fatal(err)
 	}
-	fmt.Println(tables)
+	fmt.Printf("show tables: %s\n", tables)
 
 	//myProps := &DbVersionCtlProps{
 	//	ScriptResourceMode:               EMBEDFS,

@@ -236,6 +236,50 @@ func Test05_baseline_reset(t *testing.T) {
 	}
 }
 
+func Test06_deploy_increase(t *testing.T) {
+	tbls, err := showTables()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(tbls) < 2 {
+		t.Fatal("测试数据不正确，即存表未导入，请确认是否先执行了Test01_xxx到Test05_xxx")
+	}
+	hasCtlTbl := false
+	for _, tbl := range tbls {
+		if tbl == defaultDbVersionTableName {
+			hasCtlTbl = true
+			break
+		}
+	}
+	if !hasCtlTbl {
+		t.Fatal("测试数据不正确，没有导入版本控制表，请确认是否先执行了Test01_xxx到Test05_xxx")
+	}
+
+	myProps := &DbVersionCtlProps{
+		ScriptResourceMode:               EMBEDFS,
+		ScriptDirs:                       "embedfs:db/test01,embedfs:db/test02,embedfs:db/test03,embedfs:db/test04,embedfs:db/test05,embedfs:db/test06",
+		BaselineBusinessSpaceAndVersions: "template_V3.11.999,smtp_V3.0.999",
+		DbVersionTableName:               defaultDbVersionTableName,
+		DbVersionTableCreateSqlPath:      defaultDbVersionTableCreateSqlPath,
+		DriverClassName:                  "mysql8",
+		Host:                             "localhost",
+		Port:                             "3307",
+		Database:                         "db_footprint_test",
+		Username:                         "zhaochun1",
+		Password:                         "zhaochun@GITHUB",
+		ExistTblQuerySql:                 defaultExistTblQuerySql,
+		BaselineReset:                    "y",
+		BaselineResetConditionSql:        "SELECT 1 FROM brood_db_version_ctl WHERE version = 'template_V3.10.11'",
+		ModifyDbVersionTable:             "",
+		ModifyDbVersionTableSqlPath:      "",
+	}
+
+	err = DoDBVersionControl(nil, myProps, &resources.DBFilesTest)
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
 func TestReadSql(t *testing.T) {
 	fmt.Println()
 	fmt.Println("db/test01 下的文件")
@@ -356,47 +400,6 @@ func TestAnalyzeDetailsFromSqlFileName(t *testing.T) {
 		t.Fatal("匹配了不正确的文件名")
 	}
 }
-
-//func TestGroupAndSort(t *testing.T) {
-//	allFileInfos, err := ReadSql(&resources.DBFilesTest, "db", nil)
-//	if err != nil {
-//		t.Fatal(err)
-//	}
-//
-//	group := make(map[string][]*SqlScriptInfo)
-//	for _, fileInfo := range allFileInfos {
-//		group[fileInfo.BusinessSpace] = append(group[fileInfo.BusinessSpace], fileInfo)
-//	}
-//
-//	for bs, subInfos := range group {
-//		fmt.Printf("业务空间: %s\n", bs)
-//		fmt.Println("排序前:")
-//		for _, info := range subInfos {
-//			fmt.Printf("  sql脚本名: %s\n", info.Name)
-//		}
-//		sort.SliceStable(subInfos, func(i, j int) bool {
-//			infoI := subInfos[i]
-//			infoJ := subInfos[j]
-//			if infoI.MajorVersion == infoJ.MajorVersion {
-//				if infoI.MinorVersion == infoJ.MinorVersion {
-//					if infoI.PatchVersion == infoJ.PatchVersion {
-//						return infoI.ExtendVersion < infoJ.ExtendVersion
-//					} else {
-//						return infoI.PatchVersion < infoJ.PatchVersion
-//					}
-//				} else {
-//					return infoI.MinorVersion < infoJ.MinorVersion
-//				}
-//			} else {
-//				return infoI.MajorVersion < infoJ.MajorVersion
-//			}
-//		})
-//		fmt.Println("排序后:")
-//		for _, info := range subInfos {
-//			fmt.Printf("  sql脚本名: %s\n", info.Name)
-//		}
-//	}
-//}
 
 func TestQueryExistTblNames(t *testing.T) {
 	ctlProps = FillDefaultFields(prepareCtlProps())

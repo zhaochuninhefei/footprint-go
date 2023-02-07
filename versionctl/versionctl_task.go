@@ -75,12 +75,12 @@ func (cvtt *CreateVersionTblTask) RunTask() error {
 	var err error
 	switch ScriptResourceMode(pathTmpArr[0]) {
 	case EMBEDFS:
-		sqlBytes, err = cvtt.dbFS.ReadFile(dbVersionTableCreateSqlPath)
+		sqlBytes, err = cvtt.dbFS.ReadFile(pathTmpArr[1])
 		if err != nil {
 			return err
 		}
 	case FILESYSTEM:
-		sqlBytes, err = ioutil.ReadFile(dbVersionTableCreateSqlPath)
+		sqlBytes, err = ioutil.ReadFile(pathTmpArr[1])
 		if err != nil {
 			return err
 		}

@@ -29,25 +29,29 @@ func TestDoDBVersionControl(t *testing.T) {
 	}
 	fmt.Printf("show tables: %s\n", tables)
 
-	//myProps := &DbVersionCtlProps{
-	//	ScriptResourceMode:               EMBEDFS,
-	//	ScriptDirs:                       "",
-	//	BaselineBusinessSpaceAndVersions: "",
-	//	DbVersionTableName:               defaultDbVersionTableName,
-	//	DbVersionTableCreateSqlPath:      defaultDbVersionTableCreateSqlPath,
-	//	DriverClassName:                  "",
-	//	Host:                             "",
-	//	Port:                             "",
-	//	Database:                         "",
-	//	Username:                         "",
-	//	Password:                         "",
-	//	ExistTblQuerySql:                 defaultExistTblQuerySql,
-	//	BaselineReset:                    "",
-	//	BaselineResetConditionSql:        "",
-	//	ModifyDbVersionTable:             "",
-	//	ModifyDbVersionTableSqlPath:      "",
-	//}
+	myProps := &DbVersionCtlProps{
+		ScriptResourceMode:               EMBEDFS,
+		ScriptDirs:                       "embedfs:db/test01",
+		BaselineBusinessSpaceAndVersions: "template_V2.11.0,smtp_V2.0.0",
+		DbVersionTableName:               defaultDbVersionTableName,
+		DbVersionTableCreateSqlPath:      defaultDbVersionTableCreateSqlPath,
+		DriverClassName:                  "mysql8",
+		Host:                             "localhost",
+		Port:                             "3307",
+		Database:                         "db_footprint_test",
+		Username:                         "zhaochun1",
+		Password:                         "zhaochun@GITHUB",
+		ExistTblQuerySql:                 defaultExistTblQuerySql,
+		BaselineReset:                    "",
+		BaselineResetConditionSql:        "",
+		ModifyDbVersionTable:             "",
+		ModifyDbVersionTableSqlPath:      "",
+	}
 
+	err = DoDBVersionControl(myDb, myProps, &resources.DBFilesTest)
+	if err != nil {
+		t.Fatal(err)
+	}
 }
 
 func TestReadSql(t *testing.T) {

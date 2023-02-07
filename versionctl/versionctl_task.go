@@ -208,6 +208,11 @@ func (ivt *IncreaseVersionTask) RunTask() error {
 		}
 		allFileInfos = append(allFileInfos, subScriptInfos...)
 	}
+	if len(allFileInfos) == 0 {
+		zclog.Info("没有增量sql脚本需要执行.")
+		zclog.Info("IncreaseVersionTask end...")
+		return nil
+	}
 
 	// 对增量脚本集合按业务空间做分组，并排序
 	group := make(map[string][]*SqlScriptInfo)

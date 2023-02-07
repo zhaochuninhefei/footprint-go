@@ -192,6 +192,50 @@ func Test04_deploy_increase(t *testing.T) {
 	}
 }
 
+func Test05_baseline_reset(t *testing.T) {
+	tbls, err := showTables()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(tbls) < 2 {
+		t.Fatal("测试数据不正确，即存表未导入，请确认是否先执行了Test01_xxx到Test04_xxx")
+	}
+	hasCtlTbl := false
+	for _, tbl := range tbls {
+		if tbl == defaultDbVersionTableName {
+			hasCtlTbl = true
+			break
+		}
+	}
+	if !hasCtlTbl {
+		t.Fatal("测试数据不正确，没有导入版本控制表，请确认是否先执行了Test01_xxx到Test04_xxx")
+	}
+
+	myProps := &DbVersionCtlProps{
+		ScriptResourceMode:               EMBEDFS,
+		ScriptDirs:                       "embedfs:db/test01,embedfs:db/test02,embedfs:db/test03,embedfs:db/test04,embedfs:db/test05",
+		BaselineBusinessSpaceAndVersions: "template_V3.11.999,smtp_V3.0.999",
+		DbVersionTableName:               defaultDbVersionTableName,
+		DbVersionTableCreateSqlPath:      defaultDbVersionTableCreateSqlPath,
+		DriverClassName:                  "mysql8",
+		Host:                             "localhost",
+		Port:                             "3307",
+		Database:                         "db_footprint_test",
+		Username:                         "zhaochun1",
+		Password:                         "zhaochun@GITHUB",
+		ExistTblQuerySql:                 defaultExistTblQuerySql,
+		BaselineReset:                    "y",
+		BaselineResetConditionSql:        "SELECT 1 FROM brood_db_version_ctl WHERE version = 'template_V3.10.11'",
+		ModifyDbVersionTable:             "",
+		ModifyDbVersionTableSqlPath:      "",
+	}
+
+	err = DoDBVersionControl(nil, myProps, &resources.DBFilesTest)
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
 func TestReadSql(t *testing.T) {
 	fmt.Println()
 	fmt.Println("db/test01 下的文件")

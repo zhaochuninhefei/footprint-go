@@ -12,7 +12,7 @@ import (
 	"testing"
 )
 
-func TestDoDBVersionControl_deploy_init(t *testing.T) {
+func Test01_deploy_init(t *testing.T) {
 	err := clearDB()
 	if err != nil {
 		t.Fatal(err)
@@ -55,13 +55,13 @@ func TestDoDBVersionControl_deploy_init(t *testing.T) {
 	}
 }
 
-func TestDoDBVersionControl_deploy_increase(t *testing.T) {
+func Test02_deploy_increase(t *testing.T) {
 	tbls, err := showTables()
 	if err != nil {
 		t.Fatal(err)
 	}
 	if len(tbls) < 2 {
-		t.Fatal("测试数据不正确，即存表未导入，请确认是否先执行了TestDoDBVersionControl_deploy_init")
+		t.Fatal("测试数据不正确，即存表未导入，请确认是否先执行了Test01_deploy_init")
 	}
 	hasCtlTbl := false
 	for _, tbl := range tbls {
@@ -71,7 +71,7 @@ func TestDoDBVersionControl_deploy_increase(t *testing.T) {
 		}
 	}
 	if !hasCtlTbl {
-		t.Fatal("测试数据不正确，没有导入版本控制表，请确认是否先执行了TestDoDBVersionControl_deploy_init")
+		t.Fatal("测试数据不正确，没有导入版本控制表，请确认是否先执行了Test01_deploy_init")
 	}
 
 	myProps := &DbVersionCtlProps{
@@ -99,7 +99,7 @@ func TestDoDBVersionControl_deploy_increase(t *testing.T) {
 	}
 }
 
-func TestDoDBVersionControl_baseline_init(t *testing.T) {
+func Test03_baseline_init(t *testing.T) {
 	// 删除数据库版本表
 	err := dropCtlTbl(defaultDbVersionTableName)
 	if err != nil {
@@ -110,7 +110,7 @@ func TestDoDBVersionControl_baseline_init(t *testing.T) {
 		t.Fatal(err)
 	}
 	if len(tbls) < 1 {
-		t.Fatal("测试数据不正确，需要导入即存表，请确实是否先执行了TestDoDBVersionControl_deploy_init与TestDoDBVersionControl_deploy_increase")
+		t.Fatal("测试数据不正确，需要导入即存表，请确实是否先执行了Test01_deploy_init与Test02_deploy_increase")
 	}
 	hasCtlTbl := false
 	for _, tbl := range tbls {
@@ -126,6 +126,50 @@ func TestDoDBVersionControl_baseline_init(t *testing.T) {
 	myProps := &DbVersionCtlProps{
 		ScriptResourceMode:               EMBEDFS,
 		ScriptDirs:                       "embedfs:db/test01,embedfs:db/test02,embedfs:db/test03",
+		BaselineBusinessSpaceAndVersions: "template_V2.11.0,smtp_V2.0.0",
+		DbVersionTableName:               defaultDbVersionTableName,
+		DbVersionTableCreateSqlPath:      defaultDbVersionTableCreateSqlPath,
+		DriverClassName:                  "mysql8",
+		Host:                             "localhost",
+		Port:                             "3307",
+		Database:                         "db_footprint_test",
+		Username:                         "zhaochun1",
+		Password:                         "zhaochun@GITHUB",
+		ExistTblQuerySql:                 defaultExistTblQuerySql,
+		BaselineReset:                    "",
+		BaselineResetConditionSql:        "",
+		ModifyDbVersionTable:             "",
+		ModifyDbVersionTableSqlPath:      "",
+	}
+
+	err = DoDBVersionControl(nil, myProps, &resources.DBFilesTest)
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+func Test04_deploy_increase(t *testing.T) {
+	tbls, err := showTables()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(tbls) < 2 {
+		t.Fatal("测试数据不正确，即存表未导入，请确认是否先执行了Test01_xxx到Test03_xxx")
+	}
+	hasCtlTbl := false
+	for _, tbl := range tbls {
+		if tbl == defaultDbVersionTableName {
+			hasCtlTbl = true
+			break
+		}
+	}
+	if !hasCtlTbl {
+		t.Fatal("测试数据不正确，没有导入版本控制表，请确认是否先执行了Test01_xxx到Test03_xxx")
+	}
+
+	myProps := &DbVersionCtlProps{
+		ScriptResourceMode:               EMBEDFS,
+		ScriptDirs:                       "embedfs:db/test01,embedfs:db/test02,embedfs:db/test03,embedfs:db/test04",
 		BaselineBusinessSpaceAndVersions: "template_V2.11.0,smtp_V2.0.0",
 		DbVersionTableName:               defaultDbVersionTableName,
 		DbVersionTableCreateSqlPath:      defaultDbVersionTableCreateSqlPath,

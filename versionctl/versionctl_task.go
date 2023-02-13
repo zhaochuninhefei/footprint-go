@@ -21,19 +21,50 @@ import (
 const (
 	DB_VERSION_CTL_COLS_WITHOUT_ID = "business_space, major_version, minor_version, patch_version, extend_version, version, custom_name, version_type, script_file_name, script_digest_hex, success, execution_time, install_time, install_user"
 
-	sqlGetLastVersionByBSForMySQL8 = "SELECT " +
-		DB_VERSION_CTL_COLS_WITHOUT_ID +
-		" FROM (SELECT ROW_NUMBER() OVER(" +
-		"PARTITION BY business_space " +
-		"ORDER BY major_version desc,minor_version desc,patch_version desc,extend_version desc" +
-		") row_no, " + DB_VERSION_CTL_COLS_WITHOUT_ID + " FROM brood_db_version_ctl" +
-		") a where a.row_no=1"
-	sqlGetVersionsOrderByVersions = "SELECT " +
-		DB_VERSION_CTL_COLS_WITHOUT_ID +
-		" FROM brood_db_version_ctl" +
-		" ORDER BY business_space DESC, major_version DESC,minor_version DESC,patch_version DESC,extend_version DESC"
-	sqlInsertVersionCtl = "INSERT INTO brood_db_version_ctl(business_space, major_version, minor_version, patch_version, extend_version, version, custom_name, version_type, script_file_name, script_digest_hex, success, execution_time, install_time, install_user) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
-	sqlUpdateVersionCtl = "UPDATE brood_db_version_ctl set success = 1, execution_time = ? WHERE business_space = ? AND major_version = ? AND minor_version = ? AND patch_version = ? AND extend_version = ?"
+	//sqlGetLastVersionByBSForMySQL8 = "SELECT " +
+	//	DB_VERSION_CTL_COLS_WITHOUT_ID +
+	//	" FROM (SELECT ROW_NUMBER() OVER(" +
+	//	"PARTITION BY business_space " +
+	//	"ORDER BY major_version desc,minor_version desc,patch_version desc,extend_version desc" +
+	//	") row_no, " + DB_VERSION_CTL_COLS_WITHOUT_ID + " FROM brood_db_version_ctl" +
+	//	") a where a.row_no=1"
+
+	sqlGetLastVersionByBSForMySQL8 = `-- noinspection SqlDialectInspectionForFile 
+	SELECT business_space, major_version, minor_version, patch_version, extend_version, version, custom_name, version_type, script_file_name, script_digest_hex, success, execution_time, install_time, install_user 
+	FROM (
+		SELECT 
+			ROW_NUMBER() OVER(
+				PARTITION BY business_space 
+				ORDER BY major_version desc,minor_version desc,patch_version desc,extend_version desc
+			) row_no, 
+			business_space, major_version, minor_version, patch_version, extend_version, version, custom_name, version_type, script_file_name, script_digest_hex, success, execution_time, install_time, install_user 
+		FROM brood_db_version_ctl
+	) a 
+	WHERE a.row_no=1
+	`
+
+	//sqlGetVersionsOrderByVersions1 = "SELECT " +
+	//	DB_VERSION_CTL_COLS_WITHOUT_ID +
+	//	" FROM brood_db_version_ctl" +
+	//	" ORDER BY business_space DESC, major_version DESC,minor_version DESC,patch_version DESC,extend_version DESC"
+
+	sqlGetVersionsOrderByVersions = `-- noinspection SqlDialectInspectionForFile 
+	 SELECT business_space, major_version, minor_version, patch_version, extend_version, version, custom_name, version_type, script_file_name, script_digest_hex, success, execution_time, install_time, install_user 
+	 FROM brood_db_version_ctl 
+	 ORDER BY business_space DESC, major_version DESC,minor_version DESC,patch_version DESC,extend_version DESC	
+	`
+
+	sqlInsertVersionCtl = `-- noinspection SqlDialectInspectionForFile
+	 INSERT INTO 
+		 brood_db_version_ctl(business_space, major_version, minor_version, patch_version, extend_version, version, custom_name, version_type, script_file_name, script_digest_hex, success, execution_time, install_time, install_user) 
+	 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+	`
+
+	sqlUpdateVersionCtl = `-- noinspection SqlDialectInspectionForFile
+	 UPDATE brood_db_version_ctl 
+	 SET success = 1, execution_time = ? 
+	 WHERE business_space = ? AND major_version = ? AND minor_version = ? AND patch_version = ? AND extend_version = ?
+	`
 )
 
 // DbVersionCtlTask 数据库版本控制任务接口

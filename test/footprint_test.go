@@ -2,10 +2,12 @@ package test
 
 import (
 	"fmt"
+	"gitee.com/zhaochuninhefei/footprint-go/db/model"
 	"gitee.com/zhaochuninhefei/footprint-go/db/mysql"
 	"gitee.com/zhaochuninhefei/footprint-go/test/resources"
 	"gitee.com/zhaochuninhefei/footprint-go/utils"
 	"gitee.com/zhaochuninhefei/footprint-go/versionctl"
+	"github.com/stretchr/testify/assert"
 	"gorm.io/gorm"
 	"testing"
 )
@@ -59,6 +61,9 @@ func Test01_deploy_init(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+
+	versionCtls := selectVersionCtls(myDb)
+	assert.Equal(t, 6, len(versionCtls))
 }
 
 func Test02_deploy_increase(t *testing.T) {
@@ -103,6 +108,9 @@ func Test02_deploy_increase(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+
+	versionCtls := selectVersionCtls(nil)
+	assert.Equal(t, 10, len(versionCtls))
 }
 
 func Test03_baseline_init(t *testing.T) {
@@ -152,6 +160,9 @@ func Test03_baseline_init(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+
+	versionCtls := selectVersionCtls(nil)
+	assert.Equal(t, 6, len(versionCtls))
 }
 
 func Test04_deploy_increase(t *testing.T) {
@@ -196,6 +207,9 @@ func Test04_deploy_increase(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+
+	versionCtls := selectVersionCtls(nil)
+	assert.Equal(t, 8, len(versionCtls))
 }
 
 //goland:noinspection SqlDialectInspection,SqlNoDataSourceInspection
@@ -241,6 +255,9 @@ func Test05_baseline_reset(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+
+	versionCtls := selectVersionCtls(nil)
+	assert.Equal(t, 4, len(versionCtls))
 }
 
 //goland:noinspection SqlDialectInspection,SqlNoDataSourceInspection
@@ -286,6 +303,9 @@ func Test06_deploy_increase(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+
+	versionCtls := selectVersionCtls(nil)
+	assert.Equal(t, 6, len(versionCtls))
 }
 
 func clearDB() error {
@@ -335,4 +355,16 @@ func dropCtlTbl(tblName string) error {
 		return err
 	}
 	return nil
+}
+
+func selectVersionCtls(myDb *gorm.DB) []model.BroodDbVersionCtl {
+	if myDb == nil {
+		myDb, _ = mysql.ConnectMysqlByDefault(nil, dbHost, dbPort, dbUser, dbPwd, dbName)
+	}
+	versionCtls := make([]model.BroodDbVersionCtl, 0)
+	myDb.Model(model.BroodDbVersionCtl{}).Scan(&versionCtls)
+	for _, dbVersionCtl := range versionCtls {
+		fmt.Println(dbVersionCtl)
+	}
+	return versionCtls
 }

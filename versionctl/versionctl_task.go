@@ -288,7 +288,7 @@ func (ivt *IncreaseVersionTask) RunTask() error {
 				// 插入版本记录
 				result := tx.Exec(insertSql, scriptInfo.BusinessSpace, scriptInfo.MajorVersion, scriptInfo.MinorVersion,
 					scriptInfo.PatchVersion, scriptInfo.ExtendVersion, scriptInfo.Version, scriptInfo.CustomName,
-					"SQL", scriptInfo.Name, "none", 0, -1, startTime.Format(zctime.TIME_FORMAT_DASH), ivt.props.Username)
+					"SQL", scriptInfo.Name, "none", 0, -1, startTime.Format(string(zctime.TIME_FORMAT_DASH)), ivt.props.Username)
 				if result.Error != nil {
 					return result.Error
 				}
@@ -424,7 +424,7 @@ func (ibt *InsertBaselineTask) RunTask() error {
 		// 插入数据库版本控制的基线版本记录
 		result := ibt.dbClient.Exec(insertSql, bs, major, minor,
 			patch, extend, version, "none", "BaseLine", "none", "none", 1, 0,
-			time.Now().Format(zctime.TIME_FORMAT_DASH), ibt.props.Username)
+			time.Now().Format(string(zctime.TIME_FORMAT_DASH)), ibt.props.Username)
 		if result.Error != nil {
 			return result.Error
 		}
